@@ -1,6 +1,6 @@
 #encoding=utf-8
 
-string = str(input("Insira uma conta: "))
+string = "100  -1 + 3 - 1"#str(input("Insira uma conta: "))
 
 numero = []
 sinal = "pos"
@@ -10,9 +10,10 @@ lista_numero = ["1","2","3","4","5","6","7","8","9","0"]
 
 for i in range (0,len(string)-1):
 
-	if string[i] in lista_numero:
+	if str(string[i]) in lista_numero:
 
-		numero.append(int(i))
+		numero.append(int(string[i]))
+		print (numero)
 
 	else:
 
@@ -20,53 +21,63 @@ for i in range (0,len(string)-1):
 
 			if sinal == "pos":
 
-				for i in range (0,len(numero)-1):
-					print(numero)
-					soma += numero[i]*10**(len(numero)-i-1)
+				print("entrou 1")
+
+				for j in range (0,len(numero)-1):
+			
+					soma += numero[j]*10**(len(numero)-j-1)
+
+					print ("Soma +: "+str(soma)+" iteracao "+str(j))
 
 				numero = []
 
 			elif sinal == "neg":
 
-				for i in range (0,len(numero)-1):
+				print("entrou 2")
 
-					soma += numero[i]*10**(len(numero)-i-1)
+				for j in range (0,len(numero)-1):
+
+					soma -= numero[j]*10**(len(numero)-j-1)
 				numero = []
 
-			sinal == "pos"
+			sinal = "pos"
 
 
 		if string[i] == "-":
 
 			if sinal == "pos":
 
-				for i in range (0,len(numero)-1):
+				print("entrou 3")
 
-					soma += numero[i]*10**(len(numero)-i-1)
+				for j in range (0,len(numero)-1):
+
+					soma += numero[j]*10**(len(numero)-j-1)
 				numero = []
 
 			elif sinal == "neg":
 
-				for i in range (0,len(numero)-1):
+				print("entrou 4")
 
-					soma += numero[i]*10**(len(numero)-i-1)
+				for j in range (0,len(numero)-1):
+
+					soma -= numero[j]*10**(len(numero)-j-1)
 				numero = []
 
-			sinal == "neg"
+			sinal = "neg"
 
 
 if sinal == "pos":
 
-	for i in range (0,len(numero)-1):
+	for j in range (0,len(numero)-1):
 
-		soma += numero[i]*10**(len(numero)-i-1)
+		soma += numero[j]*10**(len(numero)-j-1)
 	numero = []
 
 elif sinal == "neg":
 
-	for i in range (0,len(numero)-1):
+	for j in range (0,len(numero)-1):
 
-		soma += numero[i]*10**(len(numero)-i-1)
+		soma -= numero[j]*10**(len(numero)-j-1)
 	numero = []
 
 print(soma)
