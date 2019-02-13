@@ -1,6 +1,6 @@
 #encoding=utf-8
 
-string = " 40 -1 + 3 - 1"#str(input("Insira uma conta: "))
+string = str(input("Insira uma conta: "))  #" -4 -1 + 3 - 100"
 
 numero = []
 sinal = "pos"
@@ -13,7 +13,7 @@ for i in range (0,len(string)):
 	if str(string[i]) in lista_numero:
 
 		numero.append(int(string[i]))
-		print (numero)
+
 
 	else:
 
@@ -21,29 +21,19 @@ for i in range (0,len(string)):
 
 			if sinal == "pos":
 
-				print("entrou 1")
 
 				for j in range (0,len(numero)):
 					
-					print("oi: "+str(numero[j]*10**(len(numero)-j-1)))
-
 					soma += numero[j]*10**(len(numero)-j-1)
-
-					print ("Soma 1 +: "+str(soma))
 
 				numero = []
 
 			elif sinal == "neg":
 
-				print("entrou 2")
 
 				for j in range (0,len(numero)):
 
-					print("oi: "+str(numero[j]*10**(len(numero)-j-1)))
-
 					soma -= numero[j]*10**(len(numero)-j-1)
-
-				print ("Soma 2 +: "+str(soma))
 
 				numero = []
 
@@ -54,23 +44,18 @@ for i in range (0,len(string)):
 
 			if sinal == "pos":
 
-				print("entrou 3")
-
 				for j in range (0,len(numero)):
 
 					soma += numero[j]*10**(len(numero)-j-1)
-
-				print ("Soma 3 +: "+str(soma))
 
 				numero = []
 
 			elif sinal == "neg":
 
-				print("entrou 4")
-
 				for j in range (0,len(numero)):
 
 					soma -= numero[j]*10**(len(numero)-j-1)
+
 				numero = []
 
 			sinal = "neg"
@@ -81,6 +66,7 @@ if sinal == "pos":
 	for j in range (0,len(numero)):
 
 		soma += numero[j]*10**(len(numero)-j-1)
+
 	numero = []
 
 elif sinal == "neg":
@@ -90,4 +76,5 @@ elif sinal == "neg":
 		soma -= numero[j]*10**(len(numero)-j-1)
 	numero = []
 
-print(soma)
+print("Resultado final: "+str(soma))
+
