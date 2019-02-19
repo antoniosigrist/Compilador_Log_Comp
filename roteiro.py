@@ -93,15 +93,21 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext(Parser.tokens)
 
+			#### TRATAMENTO DE ERROS
+
 			if (nexttoken.string == last_token):
 
-				print("Parser Error: "+str(token_error) +"o token is the same type of the previous. Invalid sintax")
+				raise Exception("Parser Error: {}o token is the same type of the previous. Invalid sintax".format(token_error))
 
-				break
+			if (nexttoken.value == "signal" and last_token == "minus") or (nexttoken.value == "signal" and last_token == "plus"):
+
+				print("Parser Error: {}o token is a signal and is the same type of the last one")
+				raise Exception("Parser Error: {}o token is a signal and is the same type of the last one".format(token_error))
+
+			# INSERE OS TOKEN PARA REALIZAR A SOMA
 
 			if nexttoken.string == "int":
 
-				#print(nexttoken.value)
 				if signal == "plus":
 					
 					soma += nexttoken.value
@@ -111,6 +117,8 @@ class Parser:
 					soma -= nexttoken.value
 
 				last_token = nexttoken.string
+
+			### GUARDA O ULTIMO SINAL QUE SERA USADO PARA REALIZAR A CONTA
 
 			if nexttoken.string == "minus":
 
@@ -137,7 +145,7 @@ class Parser:
 
 	
 
-string = "-1+2" #str(input("Insira uma conta: "))
+string = "-1 -  + 2" #str(input("Insira uma conta: "))
 
 
 soma = Parser.run(string)
