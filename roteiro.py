@@ -75,6 +75,14 @@ class Tokenizer:
 
 				return tokenizer.actual
 
+			else:
+
+				tokenizer.actual.string = "unrecognized"
+				tokenizer.actual.value = "unrecognized"
+				tokenizer.position = i+1
+
+				return tokenizer.actual
+
 
 		return tokenizer.actual
 
@@ -95,13 +103,16 @@ class Parser:
 
 			#### TRATAMENTO DE ERROS
 
+			if nexttoken.string == "unrecognized":
+
+				raise Exception("Parser Error: {}o token is unrecognized. Invalid sintax".format(token_error))
+
 			if (nexttoken.string == last_token):
 
 				raise Exception("Parser Error: {}o token is the same type of the previous. Invalid sintax".format(token_error))
 
 			if (nexttoken.value == "signal" and last_token == "minus") or (nexttoken.value == "signal" and last_token == "plus"):
 
-				print("Parser Error: {}o token is a signal and is the same type of the last one")
 				raise Exception("Parser Error: {}o token is a signal and is the same type of the last one".format(token_error))
 
 			# INSERE OS TOKEN PARA REALIZAR A SOMA
@@ -132,6 +143,10 @@ class Parser:
 
 			token_error += 1
 
+		if last_token == "minus" or last_token == "plus":
+
+			raise Exception("Parser Error: you cannot end your calculus with a signal token. Must be a number")
+
 		return soma
 
 
@@ -145,7 +160,7 @@ class Parser:
 
 	
 
-string = "-1 -  + 2" #str(input("Insira uma conta: "))
+string = "-1- 0-0+0" #str(input("Insira uma conta: "))
 
 
 soma = Parser.run(string)
