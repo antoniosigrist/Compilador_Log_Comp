@@ -60,7 +60,7 @@ class Tokenizer:
 			elif tokenizer.origin[i] == "+":
 
 				tokenizer.actual.string = "plus"
-				tokenizer.actual.value = int(0)
+				tokenizer.actual.value = "signal"
 				tokenizer.position = i+1
 
 				return tokenizer.actual
@@ -69,7 +69,7 @@ class Tokenizer:
 			elif tokenizer.origin[i] == "-":
 
 				tokenizer.actual.string = "minus"
-				tokenizer.actual.value = int(0)
+				tokenizer.actual.value = "signal"
 				tokenizer.position = i+1
 
 
@@ -84,14 +84,47 @@ class Parser:
 	@staticmethod
 	def parserExpression():
 
+		token_error = 1
+		soma = 0
+		signal = "plus"
+		last_token = ""
+
 		while Parser.tokens.position < len(Parser.tokens.origin):
 
 			nexttoken = Parser.tokens.selectNext(Parser.tokens)
 
-			print(nexttoken.string)
-			print(nexttoken.value)
+			if (nexttoken.string == last_token):
 
-			print( "\n")
+				print("Parser Error: "+str(token_error) +"o token is the same type of the previous. Invalid sintax")
+
+				break
+
+			if nexttoken.string == "int":
+
+				#print(nexttoken.value)
+				if signal == "plus":
+					
+					soma += nexttoken.value
+
+				elif signal == "minus":
+
+					soma -= nexttoken.value
+
+				last_token = nexttoken.string
+
+			if nexttoken.string == "minus":
+
+				signal = "minus"
+				last_token = "minus"
+
+			elif nexttoken.string == "plus":
+
+				signal = "plus"
+				last_token = "plus"
+
+			token_error += 1
+
+		return soma
 
 
 	@staticmethod
@@ -104,7 +137,9 @@ class Parser:
 
 	
 
-string = "0+21-  50" #str(input("Insira uma conta: "))
+string = "-1+2" #str(input("Insira uma conta: "))
 
 
-Parser.run(string)
+soma = Parser.run(string)
+
+print(soma)
