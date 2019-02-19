@@ -160,7 +160,7 @@ class Parser:
 
 	
 
-string = "-1- 0-0+0" #str(input("Insira uma conta: "))
+string = str(input("Insira uma conta: "))
 
 
 soma = Parser.run(string)
