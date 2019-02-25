@@ -26,6 +26,14 @@ class Tokenizer:
 
 		numero = ""
 
+		if tokenizer.position >= len(tokenizer.origin):
+
+			tokenizer.actual.string = "EOF"
+			tokenizer.actual.value = "EOF"
+
+			return tokenizer.actual
+			
+
 		for i in range(tokenizer.position,len(tokenizer.origin)):
 
 
@@ -66,12 +74,30 @@ class Tokenizer:
 				return tokenizer.actual
 
 
+
 			elif tokenizer.origin[i] == "-":
 
 				tokenizer.actual.string = "minus"
 				tokenizer.actual.value = "signal"
 				tokenizer.position = i+1
 
+
+				return tokenizer.actual
+
+
+			elif tokenizer.origin[i] == "*":
+
+				tokenizer.actual.string = "times"
+				tokenizer.actual.value = "signal"
+				tokenizer.position = i+1
+
+				return tokenizer.actual
+
+			elif tokenizer.origin[i] == "/":
+
+				tokenizer.actual.string = "division"
+				tokenizer.actual.value = "signal"
+				tokenizer.position = i+1
 
 				return tokenizer.actual
 
@@ -96,8 +122,9 @@ class Parser:
 		soma = 0
 		signal = "plus"
 		last_token = ""
+		nexttoken = Token("","")
 
-		while Parser.tokens.position < len(Parser.tokens.origin):
+		while nexttoken.string != "EOF":
 
 			nexttoken = Parser.tokens.selectNext(Parser.tokens)
 
@@ -133,19 +160,25 @@ class Parser:
 
 			if nexttoken.string == "minus":
 
-				signal = "minus"
+				signal = nexttoken.string
 				last_token = "minus"
 
 			elif nexttoken.string == "plus":
 
-				signal = "plus"
+				signal = nexttoken.string
 				last_token = "plus"
 
 			token_error += 1
 
+		#### Reconhece erros de terminar com sinal e nao possuir numero
+
 		if last_token == "minus" or last_token == "plus":
 
 			raise Exception("Parser Error: you cannot end your calculation with a signal token. Must be a number")
+
+		if last_token == "":
+
+			raise Exception("Parser Error: it is expected at least one number")
 
 		return soma
 

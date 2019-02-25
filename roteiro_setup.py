@@ -26,6 +26,14 @@ class Tokenizer:
 
 		numero = ""
 
+		if tokenizer.position >= len(tokenizer.origin):
+
+			tokenizer.actual.string = "EOF"
+			tokenizer.actual.value = "EOF"
+
+			return tokenizer.actual
+			
+
 		for i in range(tokenizer.position,len(tokenizer.origin)):
 
 
@@ -66,12 +74,30 @@ class Tokenizer:
 				return tokenizer.actual
 
 
+
 			elif tokenizer.origin[i] == "-":
 
 				tokenizer.actual.string = "minus"
 				tokenizer.actual.value = "signal"
 				tokenizer.position = i+1
 
+
+				return tokenizer.actual
+
+
+			elif tokenizer.origin[i] == "*":
+
+				tokenizer.actual.string = "times"
+				tokenizer.actual.value = "signal"
+				tokenizer.position = i+1
+
+				return tokenizer.actual
+
+			elif tokenizer.origin[i] == "/":
+
+				tokenizer.actual.string = "division"
+				tokenizer.actual.value = "signal"
+				tokenizer.position = i+1
 
 				return tokenizer.actual
 
@@ -94,16 +120,20 @@ class Parser:
 
 		token_error = 1
 		soma = 0
-		signal = "plus"
-		last_token = ""
+
+		nexttoken = Parser.tokens.selectNext(Parser.tokens)
+
+		if nexttoken.string == "int":
+
+			soma += nexttoken.value
 
 
-		while Parser.tokens.position < len(Parser.tokens.origin):
+		while nexttoken.string != "EOF":
 
+			if nexttoken.string == "int":
 
-			nexttoken = Parser.tokens.selectNext(Parser.tokens)
+				nexttoken = Parser.tokens.selectNext(Parser.tokens)
 
-			print(nexttoken.string)
 
 			#### TRATAMENTO DE ERROS
 
@@ -111,46 +141,48 @@ class Parser:
 
 				raise Exception("Parser Error: {}o token is unrecognized. Invalid sintax".format(token_error))
 
-			if (nexttoken.string == last_token):
-
-				raise Exception("Parser Error: {}o token is the same type of the previous. Invalid sintax".format(token_error))
-
-			if (nexttoken.value == "signal" and last_token == "minus") or (nexttoken.value == "signal" and last_token == "plus"):
-
-				raise Exception("Parser Error: {}o token is a signal and is the same type of the last one".format(token_error))
 
 			# INSERE OS TOKEN PARA REALIZAR A SOMA
 
-			if nexttoken.string == "int":
+			if nexttoken.string == "minus":
 
-				if signal == "plus":
-					
-					soma += nexttoken.value
+				nexttoken = Parser.tokens.selectNext(Parser.tokens)
 
-				elif signal == "minus":
+				if nexttoken.string != "int":
+
+					raise Exception("Parser Error: expected int token on {} token".format(token_error))
+
+				else:
 
 					soma -= nexttoken.value
 
-				last_token = nexttoken.string
-
-			### GUARDA O ULTIMO SINAL QUE SERA USADO PARA REALIZAR A CONTA
-
-			if nexttoken.string == "minus":
-
-				signal = "minus"
-				last_token = "minus"
-
 			elif nexttoken.string == "plus":
 
-				signal = "plus"
-				last_token = "plus"
+				nexttoken = Parser.tokens.selectNext(Parser.tokens)
 
-			token_error += 1
-			#print(token_error)
+				if nexttoken.string != "int":
 
-		if last_token == "minus" or last_token == "plus":
+					raise Exception("Parser Error: expected int token on {} token".format(token_error))
 
-			raise Exception("Parser Error: you cannot end your calculus with a signal token. Must be a number")
+				else:
+
+					soma += nexttoken.value
+					
+
+			elif nexttoken.string == "int":
+
+				raise Exception("Parser Error: expected operator token on {} token".format(token_error))
+
+			
+			nexttoken = Parser.tokens.selectNext(Parser.tokens)
+
+
+
+
+
+
+			token_error+=1
+
 
 		return soma
 
@@ -158,8 +190,8 @@ class Parser:
 	@staticmethod
 	def run(code):
 
-
 		Parser.tokens = Tokenizer(code,0,None)
+
 
 		return Parser.parserExpression()
 
@@ -170,4 +202,4 @@ string = str(input("Insira uma conta: "))
 
 soma = Parser.run(string)
 
-print("O resultado da sua operação é: "+ str(soma))
+print(soma)
