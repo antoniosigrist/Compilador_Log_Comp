@@ -145,7 +145,7 @@ class Parser:
 
 		if last_token == "minus" or last_token == "plus":
 
-			raise Exception("Parser Error: you cannot end your calculus with a signal token. Must be a number")
+			raise Exception("Parser Error: you cannot end your calculation with a signal token. Must be a number")
 
 		return soma
 
