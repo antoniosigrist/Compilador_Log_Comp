@@ -9,108 +9,121 @@ class Token:
 
 class Tokenizer:
 
-	def __init__(self,origin,position,actual):
+	def __init__(self,origin):
 
 		self.origin = str(origin)
-		self.position = int(position)
+		self.position = 0
+		self.actual = Token("int",0)
 
-		if actual == None:
-
-			self.actual = Token("int",0)
-
-		else:
-
-			self.actual = Token(actual.string,actual.value)
-
-	def selectNext(self,tokenizer):
+		
+	def selectNext(self):
 
 		numero = ""
+		comment = False
 
-		if tokenizer.position >= len(tokenizer.origin):
+		if self.position >= len(self.origin):
 
-			tokenizer.actual.string = "EOF"
-			tokenizer.actual.value = "EOF"
+			self.actual.string = "EOF"
+			self.actual.value = "EOF"
 
-			return tokenizer.actual
+			return self.actual
 			
 
-		for i in range(tokenizer.position,len(tokenizer.origin)):
-
-
-			if tokenizer.origin[i] == " ":
+		for i in range(self.position,len(self.origin)):
+	
+			if self.origin[i] == " ":
 
 				pass
 
+			elif self.origin[i] == "'":
+
+				comment = True
+
+			elif comment == True:
 
 
-			elif str(tokenizer.origin[i]).isdigit():
+					if self.origin[i-1] == '/' and self.origin[i] == 'r':
 
-				while tokenizer.origin[i].isdigit():
+						comment = False
+
+						self.position = i+1
+
+					if self.position >= len(self.origin):
+
+						self.actual.string = "EOF"
+						self.actual.value = "EOF"
+
+						return self.actual
 
 
-					numero += tokenizer.origin[i]
+			elif str(self.origin[i]).isdigit():
+
+				while self.origin[i].isdigit():
+
+
+					numero += self.origin[i]
 
 					i += 1
 
-					if i > len(tokenizer.origin)-1:
+					if i > len(self.origin)-1:
 
 						break
 
 
-				tokenizer.actual.string = "int"
-				tokenizer.actual.value = int(numero)
-				tokenizer.position = i
+				self.actual.string = "int"
+				self.actual.value = int(numero)
+				self.position = i
 
 
-				return tokenizer.actual
+				return self.actual
 
 
-			elif tokenizer.origin[i] == "+":
+			elif self.origin[i] == "+":
 
-				tokenizer.actual.string = "plus"
-				tokenizer.actual.value = "signal"
-				tokenizer.position = i+1
+				self.actual.string = "plus"
+				self.actual.value = "signal"
+				self.position = i+1
 
-				return tokenizer.actual
-
-
-
-			elif tokenizer.origin[i] == "-":
-
-				tokenizer.actual.string = "minus"
-				tokenizer.actual.value = "signal"
-				tokenizer.position = i+1
+				return self.actual
 
 
-				return tokenizer.actual
+
+			elif self.origin[i] == "-":
+
+				self.actual.string = "minus"
+				self.actual.value = "signal"
+				self.position = i+1
 
 
-			elif tokenizer.origin[i] == "*":
+				return self.actual
 
-				tokenizer.actual.string = "times"
-				tokenizer.actual.value = "signal"
-				tokenizer.position = i+1
 
-				return tokenizer.actual
+			elif self.origin[i] == "*":
 
-			elif tokenizer.origin[i] == "/":
+				self.actual.string = "times"
+				self.actual.value = "signal"
+				self.position = i+1
 
-				tokenizer.actual.string = "division"
-				tokenizer.actual.value = "signal"
-				tokenizer.position = i+1
+				return self.actual
 
-				return tokenizer.actual
+			elif self.origin[i] == "/":
+
+				self.actual.string = "division"
+				self.actual.value = "signal"
+				self.position = i+1
+
+				return self.actual
 
 			else:
 
-				tokenizer.actual.string = "unrecognized"
-				tokenizer.actual.value = "unrecognized"
-				tokenizer.position = i+1
+				self.actual.string = "unrecognized"
+				self.actual.value = str(self.origin[i])
+				self.position = i+1
 
-				return tokenizer.actual
+				return self.actual
 
 
-		return tokenizer.actual
+		return self.actual
 
 
 class Parser:
@@ -118,88 +131,74 @@ class Parser:
 	@staticmethod
 	def parserExpression():
 
-		token_error = 1
-		soma = 0
-
-		nexttoken = Parser.tokens.selectNext(Parser.tokens)
+		nexttoken = Parser.tokens.actual
 
 		if nexttoken.string == "int":
 
-			soma += nexttoken.value
+			soma = nexttoken.value
 
+			nexttoken = Parser.tokens.selectNext()
 
-		while nexttoken.string != "EOF":
+			while nexttoken.string in ["plus", "minus"]:
 
-			if nexttoken.string == "int":
+				if nexttoken.string == "plus":
 
-				nexttoken = Parser.tokens.selectNext(Parser.tokens)
+					nexttoken = Parser.tokens.selectNext()
 
+					if nexttoken.string == "int":
 
-			#### TRATAMENTO DE ERROS
+						soma += nexttoken.value
+						
+					else:
 
-			if nexttoken.string == "unrecognized":
+						raise Exception("Parser Error (1): espera-se um int")
 
-				raise Exception("Parser Error: {}o token is unrecognized. Invalid sintax".format(token_error))
+				elif nexttoken.string == "minus":
 
+					nexttoken = Parser.tokens.selectNext()
 
-			# INSERE OS TOKEN PARA REALIZAR A SOMA
+					if nexttoken.string == "int":
 
-			if nexttoken.string == "minus":
+						soma -= nexttoken.value
 
-				nexttoken = Parser.tokens.selectNext(Parser.tokens)
+					else:
 
-				if nexttoken.string != "int":
+						raise Exception("Parser Error (2): espera-se um int")
 
-					raise Exception("Parser Error: expected int token on {} token".format(token_error))
-
-				else:
-
-					soma -= nexttoken.value
-
-			elif nexttoken.string == "plus":
-
-				nexttoken = Parser.tokens.selectNext(Parser.tokens)
-
-				if nexttoken.string != "int":
-
-					raise Exception("Parser Error: expected int token on {} token".format(token_error))
-
-				else:
-
-					soma += nexttoken.value
-					
-
-			elif nexttoken.string == "int":
-
-				raise Exception("Parser Error: expected operator token on {} token".format(token_error))
-
-			
-			nexttoken = Parser.tokens.selectNext(Parser.tokens)
+				nexttoken = Parser.tokens.selectNext()
 
 
 
+		else:
 
-
-
-			token_error+=1
-
+			raise Exception("Parser Error (3): espera-se um int")
 
 		return soma
-
+			
 
 	@staticmethod
 	def run(code):
 
-		Parser.tokens = Tokenizer(code,0,None)
+		Parser.tokens = Tokenizer(code)
+		Parser.tokens.selectNext()
 
+		res = Parser.parserExpression()
 
-		return Parser.parserExpression()
+		if Parser.tokens.actual.string == "EOF":
+
+			return res
+
+		else:
+
+			print(Parser.tokens.actual.string)
+			print(Parser.tokens.actual.value)
+
+			raise Exception("Parser Error: EOF")
 
 	
 
 string = str(input("Insira uma conta: "))
 
-
 soma = Parser.run(string)
 
-print(soma)
+print("O resultado da operacao é: "+str(soma))
