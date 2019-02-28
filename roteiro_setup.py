@@ -128,26 +128,77 @@ class Tokenizer:
 
 class Parser:
 
+	
+	def term():
+
+		nexttoken = Parser.tokens.actual
+		
+		soma = nexttoken.value
+
+		nexttoken = Parser.tokens.selectNext()
+
+		while nexttoken.string in ["times", "division"]:
+
+			if nexttoken.string == "times":
+
+				nexttoken = Parser.tokens.selectNext()
+
+				if nexttoken.string == "int":
+
+					soma *= nexttoken.value
+					print("3: "+str(soma))
+					
+				else:
+
+					raise Exception("Parser Error (1): espera-se um int")
+
+			elif nexttoken.string == "division":
+
+				nexttoken = Parser.tokens.selectNext()
+
+				if nexttoken.string == "int":
+
+					soma = int(soma / nexttoken.value)
+					print("4: "+str(soma))
+
+				else:
+
+					raise Exception("Parser Error (2): espera-se um int")
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+		return soma
+
+
+
 	@staticmethod
 	def parserExpression():
+
 
 		nexttoken = Parser.tokens.actual
 
 		if nexttoken.string == "int":
 
-			soma = nexttoken.value
+			soma = Parser.term()
+			print("0: "+str(soma))
 
-			nexttoken = Parser.tokens.selectNext()
+			#nexttoken = Parser.tokens.selectNext()
+
+			print(nexttoken.string)
 
 			while nexttoken.string in ["plus", "minus"]:
 
 				if nexttoken.string == "plus":
 
+					print(soma)
+
 					nexttoken = Parser.tokens.selectNext()
 
 					if nexttoken.string == "int":
 
-						soma += nexttoken.value
+						soma += Parser.term()
+						print("1: "+str(soma))
 						
 					else:
 
@@ -159,7 +210,8 @@ class Parser:
 
 					if nexttoken.string == "int":
 
-						soma -= nexttoken.value
+						soma -= Parser.term()
+						print("2: "+str(soma))
 
 					else:
 
@@ -167,11 +219,10 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-
-
 		else:
 
 			raise Exception("Parser Error (3): espera-se um int")
+
 
 		return soma
 			
