@@ -208,7 +208,6 @@ class Parser:
 
 						raise Exception("Parser Error (2): espera-se um int")
 
-				nexttoken = Parser.tokens.selectNext()
 
 		else:
 

@@ -132,10 +132,14 @@ class Parser:
 	def term():
 
 		nexttoken = Parser.tokens.actual
+
+		print("100:"+nexttoken.string + " - " + str(nexttoken.value))
 		
 		soma = nexttoken.value
 
 		nexttoken = Parser.tokens.selectNext()
+
+		print("101:"+nexttoken.string + " - " + str(nexttoken.value))
 
 		while nexttoken.string in ["times", "division"]:
 
@@ -183,22 +187,20 @@ class Parser:
 			soma = Parser.term()
 			print("0: "+str(soma))
 
-			#nexttoken = Parser.tokens.selectNext()
-
 			print(nexttoken.string)
 
 			while nexttoken.string in ["plus", "minus"]:
 
 				if nexttoken.string == "plus":
 
-					print(soma)
-
 					nexttoken = Parser.tokens.selectNext()
+					print("jj "+nexttoken.string)
 
 					if nexttoken.string == "int":
 
 						soma += Parser.term()
 						print("1: "+str(soma))
+						print("kk "+nexttoken.string)
 						
 					else:
 
@@ -217,7 +219,7 @@ class Parser:
 
 						raise Exception("Parser Error (2): espera-se um int")
 
-				nexttoken = Parser.tokens.selectNext()
+				#nexttoken = Parser.tokens.selectNext()
 
 		else:
 
@@ -241,6 +243,7 @@ class Parser:
 
 		else:
 
+			print("\nEOF TOKEN BELLOW: ")
 			print(Parser.tokens.actual.string)
 			print(Parser.tokens.actual.value)
 
