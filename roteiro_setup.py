@@ -9,7 +9,7 @@ class Token:
 
 class Tokenizer:
 
-	def __init__(self,origin):
+	def __init__(self,origin): 
 
 		self.origin = str(origin)
 		self.position = 0
@@ -41,13 +41,11 @@ class Tokenizer:
 
 			if comment == True:
 
-					print("FALAAA: "+str(i)+" - "+str(len(self.origin)))
 
 					while self.origin[i] != '\n':
 
 						self.position += 1
 
-						print(self.position)
 
 						if self.position >= len(self.origin):
 
@@ -116,6 +114,22 @@ class Tokenizer:
 
 				return self.actual
 
+			elif self.origin[i] == "(":
+
+				self.actual.string = "("
+				self.actual.value = "("
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == ")":
+
+				self.actual.string = ")"
+				self.actual.value = ")"
+				self.position = i+1
+
+				return self.actual
+
 			elif self.position >= len(self.origin):
 
 				self.actual.string = "EOF"
@@ -137,49 +151,94 @@ class Tokenizer:
 
 class Parser:
 
+	def factor():
+
+		nexttoken = Parser.tokens.actual
+
+		print("On factor: ")
+		print(nexttoken.value)
+		print("\n")
+
+		soma = 0
+
+		if nexttoken.string == "int":
+
+			soma += nexttoken.value
+
+			nexttoken = Parser.tokens.selectNext()
+
+			print ("Soma 1: "+str(soma))
+
+
+		elif nexttoken.string == "(":
+
+			print("Entrou parenteses (")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			print("No parenteses")
+
+			soma = Parser.parserExpression()
+
+			print("Saiu do parenteses")
+
+			if nexttoken.string != ")":
+
+				raise Exception ("Faltou fechar parênteses")
+
+			nexttoken = Parser.tokens.selectNext()
+
+		elif nexttoken.string == "plus":
+
+			nexttoken = Parser.tokens.selectNext()
+
+			soma += Parser.factor()
+
+
+		elif nexttoken.string == "minus":
+
+			nexttoken = Parser.tokens.selectNext()
+
+			soma -= Parser.factor()
+
+		else:
+
+			raise Exception ("Invalid Sintax")
+
+		return soma
 	
 	def term():
 
 		nexttoken = Parser.tokens.actual
 
-		print("100:"+nexttoken.string + " - " + str(nexttoken.value))
-		
-		soma = nexttoken.value
+		print("On term: ")
+		print(nexttoken.value)
+		print("\n")
 
-		nexttoken = Parser.tokens.selectNext()
+		soma = Parser.factor()
 
-		print("101:"+nexttoken.string + " - " + str(nexttoken.value))
+		print ("Soma 2: "+str(soma))
+
 
 		while nexttoken.string in ["times", "division"]:
+
 
 			if nexttoken.string == "times":
 
 				nexttoken = Parser.tokens.selectNext()
 
-				if nexttoken.string == "int":
-
-					soma *= nexttoken.value
-					print("3: "+str(soma))
+				soma *= Parser.factor()
 					
-				else:
-
-					raise Exception("Parser Error (1): espera-se um int")
 
 			elif nexttoken.string == "division":
 
 				nexttoken = Parser.tokens.selectNext()
 
-				if nexttoken.string == "int":
+				print("Entrou na divisao com o token "+str(nexttoken.value))
 
-					soma = int(soma / nexttoken.value)
-					print("4: "+str(soma))
 
-				else:
-
-					raise Exception("Parser Error (2): espera-se um int")
-
-			nexttoken = Parser.tokens.selectNext()
-
+				soma = soma // int(Parser.factor())
+						
 
 		return soma
 
@@ -191,48 +250,36 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		if nexttoken.string == "int":
+		print("On Expression: ")
+		print(nexttoken.value)
+		print("\n")
 
-			soma = Parser.term()
-			print("0: "+str(soma))
 
-			print(nexttoken.string)
+		soma = Parser.term()
+		
+		print ("Soma 3: "+str(soma))
 
-			while nexttoken.string in ["plus", "minus"]:
+		while nexttoken.string in ["plus", "minus"]:
 
-				if nexttoken.string == "plus":
 
-					nexttoken = Parser.tokens.selectNext()
-					print("jj "+nexttoken.string)
+			if nexttoken.string == "plus":
 
-					if nexttoken.string == "int":
+				nexttoken = Parser.tokens.selectNext()
+				
 
-						soma += Parser.term()
-						print("1: "+str(soma))
-						print("kk "+nexttoken.string)
+				
+
+				soma += Parser.term()
+					
+
+			elif nexttoken.string == "minus":
+
+				nexttoken = Parser.tokens.selectNext()
+
+				
+
+				soma -= Parser.term()
 						
-					else:
-
-						raise Exception("Parser Error (1): espera-se um int")
-
-				elif nexttoken.string == "minus":
-
-					nexttoken = Parser.tokens.selectNext()
-
-					if nexttoken.string == "int":
-
-						soma -= Parser.term()
-						print("2: "+str(soma))
-
-					else:
-
-						raise Exception("Parser Error (2): espera-se um int")
-
-				#nexttoken = Parser.tokens.selectNext()
-
-		else:
-
-			raise Exception("Parser Error (3): espera-se um int")
 
 
 		return soma

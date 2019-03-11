@@ -9,7 +9,7 @@ class Token:
 
 class Tokenizer:
 
-	def __init__(self,origin):
+	def __init__(self,origin): 
 
 		self.origin = str(origin)
 		self.position = 0
@@ -114,6 +114,22 @@ class Tokenizer:
 
 				return self.actual
 
+			elif self.origin[i] == "(":
+
+				self.actual.string = "("
+				self.actual.value = "("
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == ")":
+
+				self.actual.string = ")"
+				self.actual.value = ")"
+				self.position = i+1
+
+				return self.actual
+
 			elif self.position >= len(self.origin):
 
 				self.actual.string = "EOF"
@@ -135,49 +151,78 @@ class Tokenizer:
 
 class Parser:
 
+	def factor():
+
+		nexttoken = Parser.tokens.actual
+
+		soma = 0
+
+		if nexttoken.string == "int":
+
+			soma += nexttoken.value
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+
+		elif nexttoken.string == "(":
+
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+			soma = Parser.parserExpression()
+
+
+			if nexttoken.string != ")":
+
+				raise Exception ("Faltou fechar parênteses")
+
+			nexttoken = Parser.tokens.selectNext()
+
+		elif nexttoken.string == "plus":
+
+			nexttoken = Parser.tokens.selectNext()
+
+			soma += Parser.factor()
+
+
+		elif nexttoken.string == "minus":
+
+			nexttoken = Parser.tokens.selectNext()
+
+			soma -= Parser.factor()
+
+		else:
+
+			raise Exception ("Invalid Sintax")
+
+		return soma
 	
 	def term():
 
 		nexttoken = Parser.tokens.actual
 
-		
-		
-		soma = nexttoken.value
 
-		nexttoken = Parser.tokens.selectNext()
+		soma = Parser.factor()
 
-		
 
 		while nexttoken.string in ["times", "division"]:
+
 
 			if nexttoken.string == "times":
 
 				nexttoken = Parser.tokens.selectNext()
 
-				if nexttoken.string == "int":
-
-					soma *= nexttoken.value
+				soma *= Parser.factor()
 					
-					
-				else:
-
-					raise Exception("Parser Error (1): espera-se um int")
 
 			elif nexttoken.string == "division":
 
 				nexttoken = Parser.tokens.selectNext()
 
-				if nexttoken.string == "int":
-
-					soma = int(soma / nexttoken.value)
-					
-
-				else:
-
-					raise Exception("Parser Error (2): espera-se um int")
-
-			nexttoken = Parser.tokens.selectNext()
-
+				soma = soma // int(Parser.factor())
+						
 
 		return soma
 
@@ -189,45 +234,24 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		if nexttoken.string == "int":
-
-			soma = Parser.term()
+		soma = Parser.term()
 		
+		while nexttoken.string in ["plus", "minus"]:
 
-			while nexttoken.string in ["plus", "minus"]:
 
-				if nexttoken.string == "plus":
+			if nexttoken.string == "plus":
 
-					nexttoken = Parser.tokens.selectNext()
+				nexttoken = Parser.tokens.selectNext()
+
+				soma += Parser.term()
 					
 
-					if nexttoken.string == "int":
+			elif nexttoken.string == "minus":
 
-						soma += Parser.term()
+				nexttoken = Parser.tokens.selectNext()
+
+				soma -= Parser.term()
 						
-						
-					else:
-
-						raise Exception("Parser Error (1): espera-se um int")
-
-				elif nexttoken.string == "minus":
-
-					nexttoken = Parser.tokens.selectNext()
-
-					if nexttoken.string == "int":
-
-						soma -= Parser.term()
-						
-
-					else:
-
-						raise Exception("Parser Error (2): espera-se um int")
-
-				#nexttoken = Parser.tokens.selectNext()
-
-		else:
-
-			raise Exception("Parser Error (3): espera-se um int")
 
 
 		return soma
