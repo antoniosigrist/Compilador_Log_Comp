@@ -33,33 +33,35 @@ class Tokenizer:
 	
 			if self.origin[i] == " ":
 
-				pass
+				i+=1
 
-			elif self.origin[i] == "'":
+			if self.origin[i] == "'":
 
 				comment = True
 
-			elif comment == True:
+			if comment == True:
 
+					print("FALAAA: "+str(i)+" - "+str(len(self.origin)))
 
-					if self.origin[i-1] == '/' and self.origin[i] == 'r':
+					while self.origin[i] != '\n':
 
-						comment = False
+						self.position += 1
 
-						self.position = i+1
+						print(self.position)
 
-					if self.position >= len(self.origin):
+						if self.position >= len(self.origin):
 
-						self.actual.string = "EOF"
-						self.actual.value = "EOF"
+							self.actual.string = "EOF"
+							self.actual.value = "EOF"
 
-						return self.actual
+							return self.actual	
+
+					comment = False
 
 
 			elif str(self.origin[i]).isdigit():
 
 				while self.origin[i].isdigit():
-
 
 					numero += self.origin[i]
 
@@ -111,6 +113,13 @@ class Tokenizer:
 				self.actual.string = "division"
 				self.actual.value = "signal"
 				self.position = i+1
+
+				return self.actual
+
+			elif self.position >= len(self.origin):
+
+				self.actual.string = "EOF"
+				self.actual.value = "EOF"
 
 				return self.actual
 

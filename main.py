@@ -33,33 +33,33 @@ class Tokenizer:
 	
 			if self.origin[i] == " ":
 
-				pass
+				i+=1
 
-			elif self.origin[i] == "'":
+			if self.origin[i] == "'":
 
 				comment = True
 
-			elif comment == True:
+			if comment == True:
 
 
-					if self.origin[i-1] == '/' and self.origin[i] == 'n':
+					while self.origin[i] != '\n':
 
-						comment = False
+						self.position += 1
 
-						self.position = i+1
 
-					if self.position >= len(self.origin):
+						if self.position >= len(self.origin):
 
-						self.actual.string = "EOF"
-						self.actual.value = "EOF"
+							self.actual.string = "EOF"
+							self.actual.value = "EOF"
 
-						return self.actual
+							return self.actual	
+
+					comment = False
 
 
 			elif str(self.origin[i]).isdigit():
 
 				while self.origin[i].isdigit():
-
 
 					numero += self.origin[i]
 
@@ -114,6 +114,13 @@ class Tokenizer:
 
 				return self.actual
 
+			elif self.position >= len(self.origin):
+
+				self.actual.string = "EOF"
+				self.actual.value = "EOF"
+
+				return self.actual
+
 			else:
 
 				self.actual.string = "unrecognized"
@@ -132,10 +139,14 @@ class Parser:
 	def term():
 
 		nexttoken = Parser.tokens.actual
+
+		
 		
 		soma = nexttoken.value
 
 		nexttoken = Parser.tokens.selectNext()
+
+		
 
 		while nexttoken.string in ["times", "division"]:
 
@@ -146,6 +157,7 @@ class Parser:
 				if nexttoken.string == "int":
 
 					soma *= nexttoken.value
+					
 					
 				else:
 
@@ -158,6 +170,7 @@ class Parser:
 				if nexttoken.string == "int":
 
 					soma = int(soma / nexttoken.value)
+					
 
 				else:
 
@@ -179,18 +192,19 @@ class Parser:
 		if nexttoken.string == "int":
 
 			soma = Parser.term()
-
+		
 
 			while nexttoken.string in ["plus", "minus"]:
 
 				if nexttoken.string == "plus":
 
-
 					nexttoken = Parser.tokens.selectNext()
+					
 
 					if nexttoken.string == "int":
 
 						soma += Parser.term()
+						
 						
 					else:
 
@@ -203,11 +217,13 @@ class Parser:
 					if nexttoken.string == "int":
 
 						soma -= Parser.term()
+						
 
 					else:
 
 						raise Exception("Parser Error (2): espera-se um int")
 
+				#nexttoken = Parser.tokens.selectNext()
 
 		else:
 
@@ -231,6 +247,7 @@ class Parser:
 
 		else:
 
+			print("\nEOF TOKEN BELLOW: ")
 			print(Parser.tokens.actual.string)
 			print(Parser.tokens.actual.value)
 
