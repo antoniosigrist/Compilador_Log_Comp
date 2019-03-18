@@ -1,0 +1,53 @@
+The syntax of Toninhums in Backus-Naur Form
+
+
+O intuito da linguagem é facilitar pessoas a identificar blocos condicionais. Atualmente, códigos que possuem muitos blocos podem ser dificil de identificar onde um comeca e onde outro termina devido ao imenso número de {}. Para isso, a pessoa poderá nomear seus blocos da maneira que achar melhor para auxiliá-la visualmente:
+
+Exemplo de códigos:
+
+||||
+
+
+
+  func criar_funcao() _func_a
+
+  a = 22
+
+  return a _func_a
+  
+
+
+  a = 2
+
+  if a == 2 **
+
+    b = 3
+
+    if b != 2 _bloco_b
+
+      a = 1
+
+      _bloco_b
+  **
+
+  else ** 
+
+  a = criar_funcao()
+
+  **
+
+
+||||
+
+
+codigo :: definicao_variavel | definicao_funcao | if_statement | for_statement | while_statement
+
+definicao_variavel :: <variavel> '=' <constante> | <variavel> | <funcao>
+
+definicao_funcao :: 'func' func_name '(' <constante> | <variavel> | <funcao> | empty ')' define_bloco codigo define_bloco
+
+define_bloco :: [a-z]+ | *+ | |+ | \+ | (+ | %+ 
+
+
+
+Fontes: https://cs.wmich.edu/~gupta/teaching/cs4850/sumII06/The%20syntax%20of%20C%20in%20Backus-Naur%20form.htm
