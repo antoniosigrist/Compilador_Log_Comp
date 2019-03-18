@@ -1,5 +1,87 @@
 #encoding=utf-8
 
+
+class Node:
+
+	def __init__(self,value,children):
+
+		self.value = variant
+		self.children = children
+
+	def Evaluate():
+
+		pass
+
+class BinOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = variant
+		self.children = children
+
+	def Evaluate():
+
+			if self.value == "+":
+
+				return Node.Evaluate(self.children[0]) + Node.Evaluate(self.children[1])
+
+			if self.value == "-":
+
+				return Node.Evaluate(self.children[0]) - Node.Evaluate(self.children[1])
+
+			if self.value == "*":
+
+				return Node.Evaluate(self.children[0]) * Node.Evaluate(self.children[1])
+
+			if self.value == "/":
+
+				return Node.Evaluate(self.children[0]) / Node.Evaluate(self.children[1])
+				
+
+class UnOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = variant
+		self.children = children
+
+	def Evaluate():
+
+		if self.value == "+":
+
+			return  Node.Evaluate(self.children[1])
+
+		if self.value == "-":
+
+			return -(Node.Evaluate(self.children[1]))
+	
+
+class IntVal(Node):
+
+	def __init__(self,value,children):
+
+		self.value = variant
+		self.children = children
+
+	def Evaluate():
+
+		return self.value
+
+
+class NoOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = variant
+		self.children = children
+
+	def Evaluate():
+
+		pass
+
+
+
+
 class Token:
 
 	def __init__(self,string,value):

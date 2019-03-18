@@ -3,11 +3,43 @@ The syntax of Toninhums in Backus-Naur Form
 
 O intuito da linguagem é facilitar pessoas a identificar blocos condicionais. Atualmente, códigos que possuem muitos blocos podem ser dificil de identificar onde um comeca e onde outro termina devido ao imenso número de {}. Para isso, a pessoa poderá nomear seus blocos da maneira que achar melhor para auxiliá-la visualmente:
 
+
+
+
+
+EBNT:
+
+
+codigo :: definicao_variavel | definicao_funcao | if_statement | for_statement | while_statement
+
+definicao_variavel :: <variavel> '=' <constante> | <variavel> | <funcao>
+
+definicao_funcao :: 'func' func_name '(' <constante> | <variavel> | <funcao> | empty ')' define_bloco codigo define_bloco
+
+define_bloco :: [a-z]+ | *+ | |+ | \+ | (+ | %+ 
+
+if_statement = 'if' <variavel> comparator <variavel> | <constante> define_bloco codigo define_bloco
+
+or_comparable = <if_statement> | <variable> | <constante> 'or' <if_statement> | <variable> | <constante> define_bloco codigo define_bloco
+
+and_comparable = <if_statement> | <variable> | <constante> 'and' <if_statement> | <variable> | <constante> define_bloco codigo define_bloco
+
+while_statement = 'while' <variavel> | <constante> comparator <variavel> | <constante> define_bloco codigo define_bloco
+
+func_name :: [a-z]+ | [0-9]+ 
+
+comparator :: '==' | '!=' | '>' | '>=' | '<' | '<='
+
+
+
+
+
 Exemplo de códigos:
 
+
+
+
 ||||
-
-
 
   func criar_funcao() _func_a
 
@@ -36,17 +68,8 @@ Exemplo de códigos:
 
   **
 
-
 ||||
 
-
-codigo :: definicao_variavel | definicao_funcao | if_statement | for_statement | while_statement
-
-definicao_variavel :: <variavel> '=' <constante> | <variavel> | <funcao>
-
-definicao_funcao :: 'func' func_name '(' <constante> | <variavel> | <funcao> | empty ')' define_bloco codigo define_bloco
-
-define_bloco :: [a-z]+ | *+ | |+ | \+ | (+ | %+ 
 
 
 
