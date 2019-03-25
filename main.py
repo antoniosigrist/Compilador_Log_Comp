@@ -21,6 +21,10 @@ class BinOp(Node):
 
 	def Evaluate(self):
 
+			print (self.value)
+			print (self.children)
+			print("\n")
+
 			if self.value == "plus":
 
 				return self.children[0].Evaluate() + self.children[1].Evaluate()
@@ -47,13 +51,13 @@ class UnOp(Node):
 
 	def Evaluate(self):
 
-		if self.value == "+":
+		if self.value == "plus":
 
-			return  Node.Evaluate(self.children[1])
+			return  self.children[0].Evaluate()
 
-		if self.value == "-":
+		if self.value == "minus":
 
-			return -(Node.Evaluate(self.children[1]))
+			return - self.children[0].Evaluate()
 	
 
 class IntVal(Node):
