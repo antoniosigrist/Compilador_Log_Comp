@@ -20,10 +20,7 @@ class BinOp(Node):
 		self.children = children
 
 	def Evaluate(self):
-
-			print (self.value)
-			print (self.children)
-			print("\n")
+		
 
 			if self.value == "plus":
 

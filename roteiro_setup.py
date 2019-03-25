@@ -20,6 +20,7 @@ class BinOp(Node):
 		self.children = children
 
 	def Evaluate(self):
+		
 
 			if self.value == "plus":
 
@@ -47,13 +48,13 @@ class UnOp(Node):
 
 	def Evaluate(self):
 
-		if self.value == "+":
+		if self.value == "plus":
 
-			return  Node.Evaluate(self.children[1])
+			return  self.children[0].Evaluate()
 
-		if self.value == "-":
+		if self.value == "minus":
 
-			return -(Node.Evaluate(self.children[1]))
+			return - self.children[0].Evaluate()
 	
 
 class IntVal(Node):
@@ -237,13 +238,9 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		print("On factor: ")
-
 		soma = 0
 
 		if nexttoken.string == "int":
-
-			print("oi: "+ str(Parser.tokens.actual.value))
 
 			node = IntVal(Parser.tokens.actual.value,[])
 
@@ -254,13 +251,9 @@ class Parser:
 
 		elif nexttoken.string == "(":
 
-			print("Entrou parenteses (")
-
 			nexttoken = Parser.tokens.selectNext()
 
 			soma = Parser.parserExpression()
-
-			print("Saiu do parenteses")
 
 			if nexttoken.string != ")":
 
@@ -296,13 +289,7 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		print("On term: ")
-		print(nexttoken.value)
-		print("\n")
-
 		node = Parser.factor()
-
-		#print ("Soma 2: "+str(soma))
 
 
 		while nexttoken.string in ["times", "division"]:
@@ -320,9 +307,6 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				print("Entrou na divisao com o token "+str(nexttoken.value))
-
-
 				soma =  Parser.factor()
 				node = BinOp("division",[node,soma])
 						
@@ -336,11 +320,6 @@ class Parser:
 
 
 		nexttoken = Parser.tokens.actual
-
-		print("On Expression: ")
-		print(nexttoken.value)
-		print("\n")
-
 
 		node = Parser.term()
 		
@@ -380,10 +359,6 @@ class Parser:
 			return res
 
 		else:
-
-			print("\nEOF TOKEN BELLOW: ")
-			print(Parser.tokens.actual.string)
-			print(Parser.tokens.actual.value)
 
 			raise Exception("Parser Error: EOF")
 
