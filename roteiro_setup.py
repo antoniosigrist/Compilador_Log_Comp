@@ -5,10 +5,10 @@ class Node:
 
 	def __init__(self,value,children):
 
-		self.value = variant
+		self.value = value
 		self.children = children
 
-	def Evaluate():
+	def Evaluate(self):
 
 		pass
 
@@ -16,36 +16,36 @@ class BinOp(Node):
 
 	def __init__(self,value,children):
 
-		self.value = variant
+		self.value = value
 		self.children = children
 
-	def Evaluate():
+	def Evaluate(self):
 
-			if self.value == "+":
+			if self.value == "plus":
 
-				return Node.Evaluate(self.children[0]) + Node.Evaluate(self.children[1])
+				return self.children[0].Evaluate() + self.children[1].Evaluate()
 
-			if self.value == "-":
+			if self.value == "minus":
 
-				return Node.Evaluate(self.children[0]) - Node.Evaluate(self.children[1])
+				return self.children[0].Evaluate() - self.children[1].Evaluate()
 
-			if self.value == "*":
+			if self.value == "times":
 
-				return Node.Evaluate(self.children[0]) * Node.Evaluate(self.children[1])
+				return self.children[0].Evaluate() * self.children[1].Evaluate()
 
-			if self.value == "/":
+			if self.value == "division":
 
-				return Node.Evaluate(self.children[0]) / Node.Evaluate(self.children[1])
+				return self.children[0].Evaluate() // self.children[1].Evaluate()
 				
 
 class UnOp(Node):
 
 	def __init__(self,value,children):
 
-		self.value = variant
+		self.value = value
 		self.children = children
 
-	def Evaluate():
+	def Evaluate(self):
 
 		if self.value == "+":
 
@@ -60,10 +60,10 @@ class IntVal(Node):
 
 	def __init__(self,value,children):
 
-		self.value = variant
+		self.value = value
 		self.children = children
 
-	def Evaluate():
+	def Evaluate(self):
 
 		return self.value
 
@@ -72,10 +72,10 @@ class NoOp(Node):
 
 	def __init__(self,value,children):
 
-		self.value = variant
+		self.value = value
 		self.children = children
 
-	def Evaluate():
+	def Evaluate(self):
 
 		pass
 
@@ -238,18 +238,18 @@ class Parser:
 		nexttoken = Parser.tokens.actual
 
 		print("On factor: ")
-		print(nexttoken.value)
-		print("\n")
 
 		soma = 0
 
 		if nexttoken.string == "int":
 
-			soma += nexttoken.value
+			print("oi: "+ str(Parser.tokens.actual.value))
+
+			node = IntVal(Parser.tokens.actual.value,[])
 
 			nexttoken = Parser.tokens.selectNext()
 
-			print ("Soma 1: "+str(soma))
+			return node
 
 
 		elif nexttoken.string == "(":
@@ -257,8 +257,6 @@ class Parser:
 			print("Entrou parenteses (")
 
 			nexttoken = Parser.tokens.selectNext()
-
-			print("No parenteses")
 
 			soma = Parser.parserExpression()
 
@@ -270,24 +268,29 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
+			return soma
+
 		elif nexttoken.string == "plus":
 
-			nexttoken = Parser.tokens.selectNext()
+			nexttoken = Parser.tokens.selectNext() 
 
-			soma += Parser.factor()
+			node = UnOp("plus",[Parser.factor()])
+
+			return node
 
 
 		elif nexttoken.string == "minus":
 
 			nexttoken = Parser.tokens.selectNext()
 
-			soma -= Parser.factor()
+			node = UnOp("minus",[Parser.factor()])
+
+			return node
 
 		else:
 
 			raise Exception ("Invalid Sintax")
 
-		return soma
 	
 	def term():
 
@@ -297,9 +300,9 @@ class Parser:
 		print(nexttoken.value)
 		print("\n")
 
-		soma = Parser.factor()
+		node = Parser.factor()
 
-		print ("Soma 2: "+str(soma))
+		#print ("Soma 2: "+str(soma))
 
 
 		while nexttoken.string in ["times", "division"]:
@@ -309,7 +312,8 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				soma *= Parser.factor()
+				soma = Parser.factor()
+				node = BinOp("times",[node,soma])
 					
 
 			elif nexttoken.string == "division":
@@ -319,10 +323,11 @@ class Parser:
 				print("Entrou na divisao com o token "+str(nexttoken.value))
 
 
-				soma = soma // int(Parser.factor())
+				soma =  Parser.factor()
+				node = BinOp("division",[node,soma])
 						
 
-		return soma
+		return node
 
 
 
@@ -337,9 +342,8 @@ class Parser:
 		print("\n")
 
 
-		soma = Parser.term()
+		node = Parser.term()
 		
-		print ("Soma 3: "+str(soma))
 
 		while nexttoken.string in ["plus", "minus"]:
 
@@ -347,24 +351,20 @@ class Parser:
 			if nexttoken.string == "plus":
 
 				nexttoken = Parser.tokens.selectNext()
-				
-
-				
-
-				soma += Parser.term()
+ 
+				soma = Parser.term()
+				node = BinOp("plus",[node,soma])
 					
 
 			elif nexttoken.string == "minus":
 
 				nexttoken = Parser.tokens.selectNext()
 
-				
-
-				soma -= Parser.term()
+				soma = Parser.term()
+				node = BinOp("minus",[node,soma])
 						
 
-
-		return soma
+		return node
 			
 
 	@staticmethod
@@ -391,6 +391,6 @@ class Parser:
 
 string = str(input("Insira uma conta: "))
 
-soma = Parser.run(string)
+soma = Parser.run(string).Evaluate()
 
 print("O resultado da operacao é: "+str(soma))
