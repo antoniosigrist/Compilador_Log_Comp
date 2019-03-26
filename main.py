@@ -8,9 +8,83 @@ class Node:
 		self.value = value
 		self.children = children
 
-	def Evaluate(self):
+	def Evaluate(self,ST):
 
 		pass
+
+
+class Assignments(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		for child in self.children:
+
+			child.Evaluate(ST)
+
+class Print(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		print (self.children[0].Evaluate(ST))
+
+
+
+class Assignment(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		ST.set(self.children[0], self.children[1].Evaluate(ST))
+
+
+
+class SymbolTable:
+
+	def __init__ (self):
+
+		self.ST = {}
+
+	def get(self,key):
+
+		if key in self.ST:
+
+			return self.ST[key]
+
+		else:
+
+			return False
+
+
+	def set(self,key,value):
+
+		self.ST.update({key: value})
+
+
+class Identifier(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		pass
+
 
 class BinOp(Node):
 
@@ -19,24 +93,24 @@ class BinOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self):
+	def Evaluate(self,ST):
 		
 
 			if self.value == "plus":
 
-				return self.children[0].Evaluate() + self.children[1].Evaluate()
+				return self.children[0].Evaluate(ST) + self.children[1].Evaluate(ST)
 
 			if self.value == "minus":
 
-				return self.children[0].Evaluate() - self.children[1].Evaluate()
+				return self.children[0].Evaluate(ST) - self.children[1].Evaluate(ST)
 
 			if self.value == "times":
 
-				return self.children[0].Evaluate() * self.children[1].Evaluate()
+				return self.children[0].Evaluate(ST) * self.children[1].Evaluate(ST)
 
 			if self.value == "division":
 
-				return self.children[0].Evaluate() // self.children[1].Evaluate()
+				return self.children[0].Evaluate(ST) // self.children[1].Evaluate(ST)
 				
 
 class UnOp(Node):
@@ -46,15 +120,15 @@ class UnOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self):
+	def Evaluate(self,ST):
 
 		if self.value == "plus":
 
-			return  self.children[0].Evaluate()
+			return  self.children[0].Evaluate(ST)
 
 		if self.value == "minus":
 
-			return - self.children[0].Evaluate()
+			return - self.children[0].Evaluate(ST)
 	
 
 class IntVal(Node):
@@ -64,9 +138,15 @@ class IntVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self):
+	def Evaluate(self,ST):
 
-		return self.value
+		if str(self.value).isdigit():
+
+			return self.value
+
+		else:
+
+			return ST.get(self.value.upper())
 
 
 class NoOp(Node):
@@ -76,11 +156,9 @@ class NoOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self):
+	def Evaluate(self,ST):
 
 		pass
-
-
 
 
 class Token:
@@ -113,8 +191,9 @@ class Tokenizer:
 			
 
 		for i in range(self.position,len(self.origin)):
+
 	
-			if self.origin[i] == " ":
+			while self.origin[i] == " ":
 
 				i+=1
 
@@ -122,25 +201,32 @@ class Tokenizer:
 
 				comment = True
 
-			if comment == True:
+			while comment == True:
 
+					if self.origin[i] == '\n':
 
-					while self.origin[i] != '\n':
+						comment = False
 
-						self.position += 1
+					else:
 
-
-						if self.position >= len(self.origin):
+						if i >= len(self.origin):
 
 							self.actual.string = "EOF"
 							self.actual.value = "EOF"
+							self.position = i
+
+							comment = False
 
 							return self.actual	
 
-					comment = False
+						i += 1	
 
+					
+					#self.position += 1  ### REVER ISSO AQUI
 
-			elif str(self.origin[i]).isdigit():
+			
+
+			if str(self.origin[i]).isdigit():
 
 				while self.origin[i].isdigit():
 
@@ -159,6 +245,55 @@ class Tokenizer:
 
 
 				return self.actual
+
+
+			elif str(self.origin[i]).isalpha():
+
+				variable = ""
+
+				while self.origin[i].isalpha():
+
+					variable += str(self.origin[i])
+
+					i += 1
+
+					if i > len(self.origin)-1:
+
+						break
+
+				variable = variable.upper()
+
+				if variable == "PRINT":
+
+					self.actual.string = "print"
+					self.actual.value = "print"
+					self.position = i
+
+					return self.actual
+
+				elif variable == "BEGIN":
+
+					self.actual.string = "begin"
+					self.actual.value = "begin"
+					self.position = i
+
+					return self.actual
+
+				elif variable == "END":
+
+					self.actual.string = "end"
+					self.actual.value = "end"
+					self.position = i
+
+					return self.actual
+
+				else:
+
+					self.actual.string = "identifier"
+					self.actual.value = str(variable)
+					self.position = i
+
+					return self.actual
 
 
 			elif self.origin[i] == "+":
@@ -203,12 +338,30 @@ class Tokenizer:
 				self.actual.value = "("
 				self.position = i+1
 
+
 				return self.actual
 
 			elif self.origin[i] == ")":
 
 				self.actual.string = ")"
 				self.actual.value = ")"
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == "=":
+
+				self.actual.string = "="
+				self.actual.value = "="
+				self.position = i+1
+
+				return self.actual
+
+
+			elif self.origin[i] == "\n":
+
+				self.actual.string = "\n"
+				self.actual.value = "\n"
 				self.position = i+1
 
 				return self.actual
@@ -234,6 +387,110 @@ class Tokenizer:
 
 class Parser:
 
+
+	def Statements():
+
+		children = []
+		
+		nexttoken = Parser.tokens.actual
+
+		if nexttoken.string != "begin":
+
+			raise Exception ("Faltou iniciar com o begin")
+
+		else:
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "\n":
+
+				raise Exception ("Faltou Quebra de Linha")
+
+			else:
+
+				nexttoken = Parser.tokens.selectNext()
+
+
+				while nexttoken.string != "end" :
+					
+					res = Parser.Statement()
+
+					if res != None:
+
+						children.append(res)
+
+					node = Assignments(" ",children)
+
+				
+				if nexttoken.value != "end":
+					
+					raise Exception ("Faltou Fechar End")
+
+				else:
+
+					nexttoken = Parser.tokens.selectNext()
+
+					return node 
+
+
+
+	def Statement():
+
+		nexttoken = Parser.tokens.actual
+
+		if nexttoken.string == "identifier":
+
+			identifier = nexttoken.value
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string in ["="]:
+
+				nexttoken = Parser.tokens.selectNext() 
+
+				res = Parser.parserExpression()
+
+				node = Assignment("=", [identifier , res])
+
+				nexttoken = Parser.tokens.selectNext() 
+
+				return node
+
+			else:
+
+				raise Exception ("Espera-se uma atribuicao")
+
+
+		elif nexttoken.string == "print":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node = Print("print",[Parser.parserExpression()])
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			return node
+
+		elif nexttoken.string == "begin":
+
+			node = Parser.Statements()
+
+			return node
+
+
+		elif nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+		else:
+
+			print(nexttoken.string)
+
+			raise Exception ("Algo deu ruim")
+
+
+
 	def factor():
 
 		nexttoken = Parser.tokens.actual
@@ -248,6 +505,13 @@ class Parser:
 
 			return node
 
+		elif nexttoken.string == "identifier":
+
+			node = IntVal(Parser.tokens.actual.value,[])
+
+			nexttoken = Parser.tokens.selectNext()
+
+			return node
 
 		elif nexttoken.string == "(":
 
@@ -280,8 +544,11 @@ class Parser:
 
 			return node
 
+
+
 		else:
 
+			print (nexttoken.value)
 			raise Exception ("Invalid Sintax")
 
 	
@@ -294,12 +561,12 @@ class Parser:
 
 		while nexttoken.string in ["times", "division"]:
 
-
 			if nexttoken.string == "times":
 
 				nexttoken = Parser.tokens.selectNext()
 
 				soma = Parser.factor()
+
 				node = BinOp("times",[node,soma])
 					
 
@@ -352,7 +619,7 @@ class Parser:
 		Parser.tokens = Tokenizer(code)
 		Parser.tokens.selectNext()
 
-		res = Parser.parserExpression()
+		res = Parser.Statements()
 
 		if Parser.tokens.actual.string == "EOF":
 
@@ -360,12 +627,20 @@ class Parser:
 
 		else:
 
+			print (Parser.tokens.actual.string)
+
 			raise Exception("Parser Error: EOF")
 
 	
 
-string = str(input("Insira uma conta: "))
 
-soma = Parser.run(string).Evaluate()
 
-print("O resultado da operacao é: "+str(soma))
+with open('test_file2.txt') as testfile:
+	string = testfile.read()
+
+
+ST1 = SymbolTable()
+
+Parser.run(string).Evaluate(ST1)
+
+print("ST = ",ST1.ST)
