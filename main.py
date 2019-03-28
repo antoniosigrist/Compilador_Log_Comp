@@ -26,7 +26,7 @@ class Assignments(Node):
 
 			child.Evaluate(ST)
 
-class Print(Node):
+class PrintOp(Node):
 
 	def __init__(self,value,children):
 
@@ -48,7 +48,7 @@ class Assignment(Node):
 
 	def Evaluate(self,ST):
 
-		ST.set(self.children[0], self.children[1].Evaluate(ST))
+		ST.setter(self.children[0], self.children[1].Evaluate(ST))
 
 
 
@@ -58,7 +58,7 @@ class SymbolTable:
 
 		self.ST = {}
 
-	def get(self,key):
+	def getter(self,key):
 
 		if key in self.ST:
 
@@ -69,9 +69,10 @@ class SymbolTable:
 			return False
 
 
-	def set(self,key,value):
+	def setter(self,key,value):
 
 		self.ST.update({key: value})
+
 
 
 class Identifier(Node):
@@ -140,13 +141,20 @@ class IntVal(Node):
 
 	def Evaluate(self,ST):
 
-		if str(self.value).isdigit():
+		return self.value
 
-			return self.value
 
-		else:
 
-			return ST.get(self.value.upper())
+class VarVal(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		return ST.getter(self.value.upper())
 
 
 class NoOp(Node):
@@ -440,7 +448,7 @@ class Parser:
 
 		if nexttoken.string == "identifier":
 
-			identifier = nexttoken.value
+			identifier = Identifier(nexttoken.value,[])
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -450,7 +458,7 @@ class Parser:
 
 				res = Parser.parserExpression()
 
-				node = Assignment("=", [identifier , res])
+				node = Assignment("=", [identifier.value , res])
 
 				nexttoken = Parser.tokens.selectNext() 
 
@@ -465,7 +473,7 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext() 
 
-			node = Print("print",[Parser.parserExpression()])
+			node = PrintOp("print",[Parser.parserExpression()])
 
 			nexttoken = Parser.tokens.selectNext() 
 
@@ -474,6 +482,8 @@ class Parser:
 		elif nexttoken.string == "begin":
 
 			node = Parser.Statements()
+
+			nexttoken = Parser.tokens.selectNext() 
 
 			return node
 
@@ -507,7 +517,7 @@ class Parser:
 
 		elif nexttoken.string == "identifier":
 
-			node = IntVal(Parser.tokens.actual.value,[])
+			node = VarVal(Parser.tokens.actual.value,[])
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -632,8 +642,6 @@ class Parser:
 			raise Exception("Parser Error: EOF")
 
 	
-
-
 
 with open('test_file2.txt') as testfile:
 	string = testfile.read()

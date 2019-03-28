@@ -1,18 +1,14 @@
-Begin
-x =    3*(4 +2 ) ' + 2*2
+begin 
+x = 10'*10/1*(0+1)
+
+BEGIN
+y=20
+uu = -1
+end
+print x* y  -uu 'printou uhuuu'
+
+begin
 
 
-Begin
-Begin ' vai curintia
-
-
-Y    = 6*2  '  /6
-z = x + y
-End
-
-End
-
-print x+y*z
-
-
-End
+end 'oioioioioi '
+end

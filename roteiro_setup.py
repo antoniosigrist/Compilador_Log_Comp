@@ -1,5 +1,6 @@
 #encoding=utf-8
 
+
 class Node:
 
 	def __init__(self,value,children):
@@ -11,6 +12,33 @@ class Node:
 
 		pass
 
+
+class Assignments(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		for child in self.children:
+
+			child.Evaluate(ST)
+
+class PrintOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		print (self.children[0].Evaluate(ST))
+
+
+
 class Assignment(Node):
 
 	def __init__(self,value,children):
@@ -20,7 +48,8 @@ class Assignment(Node):
 
 	def Evaluate(self,ST):
 
-		ST.set(self.children[0], self.children[1].Evaluate(ST))
+		ST.setter(self.children[0], self.children[1].Evaluate(ST))
+
 
 
 class SymbolTable:
@@ -29,19 +58,21 @@ class SymbolTable:
 
 		self.ST = {}
 
-	def get(key):
+	def getter(self,key):
 
-		if self.key in self.ST:
+		if key in self.ST:
 
-			return self.ST[self.key]
+			return self.ST[key]
 
 		else:
 
 			return False
 
-	def set(self,key,value):
 
-		self.ST[key] = value
+	def setter(self,key,value):
+
+		self.ST.update({key: value})
+
 
 
 class Identifier(Node):
@@ -113,6 +144,19 @@ class IntVal(Node):
 		return self.value
 
 
+
+class VarVal(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		return ST.getter(self.value.upper())
+
+
 class NoOp(Node):
 
 	def __init__(self,value,children):
@@ -155,8 +199,9 @@ class Tokenizer:
 			
 
 		for i in range(self.position,len(self.origin)):
+
 	
-			if self.origin[i] == " ":
+			while self.origin[i] == " ":
 
 				i+=1
 
@@ -164,25 +209,32 @@ class Tokenizer:
 
 				comment = True
 
-			if comment == True:
+			while comment == True:
 
+					if self.origin[i] == '\n':
 
-					while self.origin[i] != '\n':
+						comment = False
 
-						self.position += 1
+					else:
 
-
-						if self.position >= len(self.origin):
+						if i >= len(self.origin):
 
 							self.actual.string = "EOF"
 							self.actual.value = "EOF"
+							self.position = i
+
+							comment = False
 
 							return self.actual	
 
-					comment = False
+						i += 1	
 
+					
+					#self.position += 1  ### REVER ISSO AQUI
 
-			elif str(self.origin[i]).isdigit():
+			
+
+			if str(self.origin[i]).isdigit():
 
 				while self.origin[i].isdigit():
 
@@ -201,6 +253,7 @@ class Tokenizer:
 
 
 				return self.actual
+
 
 			elif str(self.origin[i]).isalpha():
 
@@ -242,11 +295,14 @@ class Tokenizer:
 
 					return self.actual
 
-				self.actual.string = "identifier"
-				self.actual.value = str(variable)
-				self.position = i
+				else:
 
-				return self.actual
+					self.actual.string = "identifier"
+					self.actual.value = str(variable)
+					self.position = i
+
+					return self.actual
+
 
 			elif self.origin[i] == "+":
 
@@ -290,6 +346,7 @@ class Tokenizer:
 				self.actual.value = "("
 				self.position = i+1
 
+
 				return self.actual
 
 			elif self.origin[i] == ")":
@@ -304,6 +361,15 @@ class Tokenizer:
 
 				self.actual.string = "="
 				self.actual.value = "="
+				self.position = i+1
+
+				return self.actual
+
+
+			elif self.origin[i] == "\n":
+
+				self.actual.string = "\n"
+				self.actual.value = "\n"
 				self.position = i+1
 
 				return self.actual
@@ -327,69 +393,113 @@ class Tokenizer:
 		return self.actual
 
 
-
 class Parser:
 
-	def statement():
 
+	def Statements():
+
+		children = []
+		
 		nexttoken = Parser.tokens.actual
 
 		if nexttoken.string != "begin":
 
-			raise Exception ("Excpected a Begin on the beggining of the sentence")
+			raise Exception ("Faltou iniciar com o begin")
 
-		nexttoken = Parser.tokens.selectNext()
+		else:
 
-		while nexttoken.string != "end":
-			
 			nexttoken = Parser.tokens.selectNext()
 
-			if nexttoken.string == "identifier":
+			if nexttoken.string != "\n":
 
-				identifier = nexttoken.value
-
-				print(identifier)
-
-				nexttoken = Parser.tokens.selectNext()
-
-				if nexttoken.string in ["="]:
-
-					nexttoken = Parser.tokens.selectNext() 
-
-					print ("nois nois" + str(Parser.parserExpression().value))
-
-					node = Assignment("=", [identifier , Parser.parserExpression()]) 
-
-					#nexttoken = Parser.tokens.selectNext()
-
-					return node
-
-				else:
-
-					pass
-
-
-			elif nexttoken.string == "print":
-
-				pass
-
-			elif nexttoken.string == "begin":
-
-				pass
+				raise Exception ("Faltou Quebra de Linha")
 
 			else:
 
-				pass
+				nexttoken = Parser.tokens.selectNext()
 
-			if nexttoken.string != "EOF":
-				print (nexttoken.string)
 
-		if nexttoken.string == "end":
+				while nexttoken.string != "end" :
+					
+					res = Parser.Statement()
+
+					if res != None:
+
+						children.append(res)
+
+					node = Assignments(" ",children)
+
+				
+				if nexttoken.value != "end":
+					
+					raise Exception ("Faltou Fechar End")
+
+				else:
+
+					nexttoken = Parser.tokens.selectNext()
+
+					return node 
+
+
+
+	def Statement():
+
+		nexttoken = Parser.tokens.actual
+
+		if nexttoken.string == "identifier":
+
+			identifier = Identifier(nexttoken.value,[])
 
 			nexttoken = Parser.tokens.selectNext()
 
+			if nexttoken.string in ["="]:
+
+				nexttoken = Parser.tokens.selectNext() 
+
+				res = Parser.parserExpression()
+
+				node = Assignment("=", [identifier.value , res])
+
+				nexttoken = Parser.tokens.selectNext() 
+
+				return node
+
+			else:
+
+				raise Exception ("Espera-se uma atribuicao")
+
+
+		elif nexttoken.string == "print":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node = PrintOp("print",[Parser.parserExpression()])
+
+			nexttoken = Parser.tokens.selectNext() 
+
 			return node
-			
+
+		elif nexttoken.string == "begin":
+
+			node = Parser.Statements()
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			return node
+
+
+		elif nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+		else:
+
+			print(nexttoken.string)
+
+			raise Exception ("Algo deu ruim")
+
+
 
 	def factor():
 
@@ -405,6 +515,13 @@ class Parser:
 
 			return node
 
+		elif nexttoken.string == "identifier":
+
+			node = VarVal(Parser.tokens.actual.value,[])
+
+			nexttoken = Parser.tokens.selectNext()
+
+			return node
 
 		elif nexttoken.string == "(":
 
@@ -437,10 +554,11 @@ class Parser:
 
 			return node
 
+
+
 		else:
 
-			print("ooioioioioioio "+nexttoken.string)
-
+			print (nexttoken.value)
 			raise Exception ("Invalid Sintax")
 
 	
@@ -453,12 +571,12 @@ class Parser:
 
 		while nexttoken.string in ["times", "division"]:
 
-
 			if nexttoken.string == "times":
 
 				nexttoken = Parser.tokens.selectNext()
 
 				soma = Parser.factor()
+
 				node = BinOp("times",[node,soma])
 					
 
@@ -509,10 +627,9 @@ class Parser:
 	def run(code):
 
 		Parser.tokens = Tokenizer(code)
-
 		Parser.tokens.selectNext()
 
-		res = Parser.statement()
+		res = Parser.Statements()
 
 		if Parser.tokens.actual.string == "EOF":
 
@@ -520,19 +637,18 @@ class Parser:
 
 		else:
 
+			print (Parser.tokens.actual.string)
+
 			raise Exception("Parser Error: EOF")
 
 	
 
-string = str(input("Insira uma conta: "))
+with open('test_file2.txt') as testfile:
+	string = testfile.read()
 
-# with open('inputCompiler.txt') as entrada:
-# 	inputCompiler = entrada.read()
 
-ST = SymbolTable()
+ST1 = SymbolTable()
 
-print(ST.ST)
+Parser.run(string).Evaluate(ST1)
 
-soma = Parser.run(string).Evaluate(ST)
-
-print("O resultado da operacao é: "+str(soma))
+print("ST = ",ST1.ST)
