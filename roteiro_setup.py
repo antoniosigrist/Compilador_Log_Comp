@@ -37,7 +37,7 @@ class PrintOp(Node):
 
 	def Evaluate(self,ST):
 
-		print (self.children[0].Evaluate(ST))
+		print(self.children[0].Evaluate(ST))
 
 
 
@@ -640,19 +640,9 @@ class Parser:
 
 			node_rel = Parser.RelExpression()
 
-			print (nexttoken.value)
-
 			nexttoken = Parser.tokens.selectNext() 
 
-			print (nexttoken.value)
-
 			node_true = Parser.Statements()
-
-			print (nexttoken.value)
-
-			#nexttoken = Parser.tokens.selectNext() 
-
-			print (nexttoken.value)
 
 			if nexttoken.string != "wend":
 
@@ -669,21 +659,14 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext() 
 
-			print("tchau: "+ str(nexttoken.value))
-
 			node_rel = Parser.RelExpression()
 
-			#nexttoken = Parser.tokens.selectNext() 
-
-			print (nexttoken.value)
 
 			if nexttoken.string != "then":
 
 				raise Exception ("Espara-se um then")
 
 			nexttoken = Parser.tokens.selectNext()
-
-			print (nexttoken.value)
 
 			if nexttoken.string == "\n":
 

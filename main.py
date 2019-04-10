@@ -569,7 +569,7 @@ class Parser:
 		
 		nexttoken = Parser.tokens.actual
 
-		while nexttoken.string != "EOF" and nexttoken.string != "end" and nexttoken.string != "wend":
+		while nexttoken.string != "EOF" and nexttoken.string != "end" and nexttoken.string != "wend" and nexttoken.string != "else":
 
 			child = Parser.Statement()
 
@@ -666,19 +666,19 @@ class Parser:
 
 				raise Exception ("Espara-se um then")
 
+			print(nexttoken.string)
+
 			nexttoken = Parser.tokens.selectNext()
-
-			if nexttoken.string == "\n":
-
-				nexttoken = Parser.tokens.selectNext()
 
 			node_true = Parser.Statements()
 
 			value = "if"
-			node_else = 0
+			
+			node_else = None
+
 
 			if nexttoken.string == "else":
-
+				
 				value = "else"
 
 				nexttoken = Parser.tokens.selectNext()
@@ -686,7 +686,7 @@ class Parser:
 				node_else = Parser.Statements()
 
 
-			elif nexttoken.string != "end":
+			if nexttoken.string != "end":
 
 				raise Exception ("Espara-se um 'end' de if")
 

@@ -1,6 +1,10 @@
-if 2 > -7 then
+if -20 > -7 then
 
 	x =  10 '*10/1*(0+1)
+
+else
+
+	x = -11
 
 end if
 
