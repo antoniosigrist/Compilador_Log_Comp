@@ -1,5 +1,7 @@
 #encoding=utf-8
 
+import sys
+
 
 class Node:
 
@@ -13,7 +15,7 @@ class Node:
 		pass
 
 
-class Assignments(Node):
+class StatementsOp(Node):
 
 	def __init__(self,value,children):
 
@@ -35,7 +37,7 @@ class PrintOp(Node):
 
 	def Evaluate(self,ST):
 
-		print (self.children[0].Evaluate(ST))
+		print(self.children[0].Evaluate(ST))
 
 
 
@@ -50,6 +52,48 @@ class Assignment(Node):
 
 		ST.setter(self.children[0], self.children[1].Evaluate(ST))
 
+class WhileOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		while self.children[0].Evaluate(ST) == True:
+
+			self.children[1].Evaluate(ST)
+
+
+class IfOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		if self.value == "if":
+
+			if self.children[0].Evaluate(ST) == True:
+
+				self.children[1].Evaluate(ST)
+
+			else:
+
+				pass
+
+		elif self.value == "else":
+
+			if self.children[0].Evaluate(ST) == True:
+
+				self.children[1].Evaluate(ST)
+
+			else:
+
+				self.children[2].Evaluate(ST)
 
 
 class SymbolTable:
@@ -112,6 +156,26 @@ class BinOp(Node):
 			if self.value == "division":
 
 				return self.children[0].Evaluate(ST) // self.children[1].Evaluate(ST)
+
+			if self.value == "=":
+
+				return self.children[0].Evaluate(ST) == self.children[1].Evaluate(ST)
+
+			if self.value == ">":
+
+				return self.children[0].Evaluate(ST) > self.children[1].Evaluate(ST)
+
+			if self.value == "<":
+
+				return self.children[0].Evaluate(ST) < self.children[1].Evaluate(ST)
+
+			if self.value == "and":
+
+				return self.children[0].Evaluate(ST) and self.children[1].Evaluate(ST)
+
+			if self.value == "or":
+
+				return self.children[0].Evaluate(ST) or self.children[1].Evaluate(ST)
 				
 
 class UnOp(Node):
@@ -130,6 +194,10 @@ class UnOp(Node):
 		if self.value == "minus":
 
 			return - self.children[0].Evaluate(ST)
+
+		if self.value == "not":
+
+			return not self.children[0].Evaluate(ST)
 	
 
 class IntVal(Node):
@@ -143,6 +211,17 @@ class IntVal(Node):
 
 		return self.value
 
+
+class InputOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		return int(input("Insira um número: \n"))
 
 
 class VarVal(Node):
@@ -201,7 +280,7 @@ class Tokenizer:
 		for i in range(self.position,len(self.origin)):
 
 	
-			while self.origin[i] == " ":
+			while self.origin[i] == " " or self.origin[i] == "	" :
 
 				i+=1
 
@@ -295,6 +374,78 @@ class Tokenizer:
 
 					return self.actual
 
+				elif variable == "WHILE":
+
+					self.actual.string = "while"
+					self.actual.value = "while"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "WEND":
+
+					self.actual.string = "wend"
+					self.actual.value = "wend"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "IF":
+
+					self.actual.string = "if"
+					self.actual.value = "if"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "ELSE":
+
+					self.actual.string = "else"
+					self.actual.value = "else"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "THEN":
+
+					self.actual.string = "then"
+					self.actual.value = "then"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "AND":
+
+					self.actual.string = "and"
+					self.actual.value = "and"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "OR":
+
+					self.actual.string = "or"
+					self.actual.value = "or"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "NOT":
+
+					self.actual.string = "not"
+					self.actual.value = "not"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "INPUT":
+
+					self.actual.string = "input"
+					self.actual.value = "input"
+					self.position = i+1
+
+					return self.actual
+
 				else:
 
 					self.actual.string = "identifier"
@@ -365,6 +516,22 @@ class Tokenizer:
 
 				return self.actual
 
+			elif self.origin[i] == ">":
+
+				self.actual.string = ">"
+				self.actual.value = ">"
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == "<":
+
+				self.actual.string = "<"
+				self.actual.value = "<"
+				self.position = i+1
+
+				return self.actual
+
 
 			elif self.origin[i] == "\n":
 
@@ -402,43 +569,21 @@ class Parser:
 		
 		nexttoken = Parser.tokens.actual
 
-		if nexttoken.string != "begin":
+		while nexttoken.string != "EOF" and nexttoken.string != "end" and nexttoken.string != "wend":
 
-			raise Exception ("Faltou iniciar com o begin")
+			child = Parser.Statement()
 
-		else:
+			if child != None:
 
-			nexttoken = Parser.tokens.selectNext()
+				children.append(child)
 
-			if nexttoken.string != "\n":
-
-				raise Exception ("Faltou Quebra de Linha")
-
-			else:
+			if nexttoken.string == "\n":
 
 				nexttoken = Parser.tokens.selectNext()
 
+		node = StatementsOp("Statements",children)
 
-				while nexttoken.string != "end" :
-					
-					res = Parser.Statement()
-
-					if res != None:
-
-						children.append(res)
-
-					node = Assignments(" ",children)
-
-				
-				if nexttoken.value != "end":
-					
-					raise Exception ("Faltou Fechar End")
-
-				else:
-
-					nexttoken = Parser.tokens.selectNext()
-
-					return node 
+		return node 
 
 
 
@@ -466,6 +611,8 @@ class Parser:
 
 			else:
 
+				print(nexttoken.value)
+
 				raise Exception ("Espera-se uma atribuicao")
 
 
@@ -487,6 +634,74 @@ class Parser:
 
 			return node
 
+		elif nexttoken.string == "while":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node_rel = Parser.RelExpression()
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node_true = Parser.Statements()
+
+			if nexttoken.string != "wend":
+
+				raise Exception ("Espara-se um wend")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			node = WhileOp("while",[node_rel,node_true])
+
+			return node
+
+
+		elif nexttoken.string == "if":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node_rel = Parser.RelExpression()
+
+
+			if nexttoken.string != "then":
+
+				raise Exception ("Espara-se um then")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
+
+			node_true = Parser.Statements()
+
+			value = "if"
+			node_else = 0
+
+			if nexttoken.string == "else":
+
+				value = "else"
+
+				nexttoken = Parser.tokens.selectNext()
+
+				node_else = Parser.Statements()
+
+
+			elif nexttoken.string != "end":
+
+				raise Exception ("Espara-se um 'end' de if")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "if":
+
+				raise Exception ("Espara-se um 'if' de end if")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			node = IfOp(value,[node_rel,node_true,node_else])
+
+			return node
+
 
 		elif nexttoken.string == "\n":
 
@@ -499,6 +714,21 @@ class Parser:
 
 			raise Exception ("Algo deu ruim")
 
+	def RelExpression():
+
+		nexttoken = Parser.tokens.actual
+
+		node1 = Parser.parserExpression()
+
+		comp_signal = nexttoken.string
+
+		nexttoken = Parser.tokens.selectNext()
+
+		node2 = Parser.parserExpression()
+
+		node = BinOp(comp_signal,[node1,node2])
+
+		return node
 
 
 	def factor():
@@ -554,7 +784,19 @@ class Parser:
 
 			return node
 
+		elif nexttoken.string == "not":
 
+			nexttoken = Parser.tokens.selectNext()
+
+			node = UnOp("not",[Parser.factor()])
+
+			return node
+
+		elif nexttoken.string == "input":
+
+			node = InputOp("input",[])
+
+			return node
 
 		else:
 
@@ -585,7 +827,17 @@ class Parser:
 				nexttoken = Parser.tokens.selectNext()
 
 				soma =  Parser.factor()
+
 				node = BinOp("division",[node,soma])
+
+
+			elif nexttoken.string == "and":
+
+				nexttoken = Parser.tokens.selectNext()
+
+				soma =  Parser.factor()
+
+				node = BinOp("and",[node,soma])
 						
 
 		return node
@@ -618,6 +870,14 @@ class Parser:
 
 				soma = Parser.term()
 				node = BinOp("minus",[node,soma])
+
+			elif nexttoken.string == "or":
+
+				nexttoken = Parser.tokens.selectNext()
+
+				soma =  Parser.factor()
+
+				node = BinOp("or",[node,soma])
 						
 
 		return node
@@ -641,9 +901,10 @@ class Parser:
 
 			raise Exception("Parser Error: EOF")
 
-	
 
-with open('test_file2.txt') as testfile:
+file_name = str(sys.argv[1])
+
+with open(file_name) as testfile:
 	string = testfile.read()
 
 

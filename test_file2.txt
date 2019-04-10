@@ -1,17 +1,13 @@
-begin 
 if 2>-7 then
 x = 10'*10/1*(0+1)
 end if
-BEGIN
 y=0
-while y < 2 
+while y < 3
 y = y + 1
+x = input
+
+w = w + x
+w = w*3
 wend
-end
+
 print x* y  -uu 'printou uhuuu'
-
-begin
-
-
-end 'oioioioioi '
-end
