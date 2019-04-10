@@ -1,18 +1,23 @@
-if 2>-7 then
-	x = 10'*10/1*(0+1)
+if 2 > -7 then
+
+	x =  10 '*10/1*(0+1)
+
 end if
+
 y=0
-while y < 3
-	y = y + 1
 
-	ee = input
+while y < 2
 
-	
-	'essa linha não faz nada'
-	w = w + x
+	xx = 1 + y 'define xx
 
+	print xx*y
 
-	w = w*3
+	y = y + 1 ' define y
+
 wend
 
-print x* y  -uu 'printou uhuuu'
+' linha de baixo pede input
+
+inp = input
+
+print xx * y - x - inp ' espera o resultado (-6 - valor do input) 
