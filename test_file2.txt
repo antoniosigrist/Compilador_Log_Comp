@@ -1,9 +1,12 @@
 begin 
+if 2>-7 then
 x = 10'*10/1*(0+1)
-
+end if
 BEGIN
-y=20
-uu = -1
+y=0
+while y < 2 
+y = y + 1
+wend
 end
 print x* y  -uu 'printou uhuuu'
 

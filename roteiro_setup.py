@@ -50,6 +50,49 @@ class Assignment(Node):
 
 		ST.setter(self.children[0], self.children[1].Evaluate(ST))
 
+class WhileOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		while self.children[0].Evaluate(ST) == True:
+
+			self.children[1].Evaluate(ST)
+
+
+class IfOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		if self.value == "if":
+
+			if self.children[0].Evaluate(ST) == True:
+
+				self.children[1].Evaluate(ST)
+
+			else:
+
+				pass
+
+		elif self.value == "else":
+
+			if self.children[0].Evaluate(ST) == True:
+
+				self.children[1].Evaluate(ST)
+
+			else:
+
+				self.children[2].Evaluate(ST)
+
 
 
 class SymbolTable:
@@ -112,6 +155,18 @@ class BinOp(Node):
 			if self.value == "division":
 
 				return self.children[0].Evaluate(ST) // self.children[1].Evaluate(ST)
+
+			if self.value == "=":
+
+				return self.children[0].Evaluate(ST) == self.children[1].Evaluate(ST)
+
+			if self.value == ">":
+
+				return self.children[0].Evaluate(ST) > self.children[1].Evaluate(ST)
+
+			if self.value == "<":
+
+				return self.children[0].Evaluate(ST) < self.children[1].Evaluate(ST)
 				
 
 class UnOp(Node):
@@ -295,6 +350,46 @@ class Tokenizer:
 
 					return self.actual
 
+				elif variable == "WHILE":
+
+					self.actual.string = "while"
+					self.actual.value = "while"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "WEND":
+
+					self.actual.string = "wend"
+					self.actual.value = "wend"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "IF":
+
+					self.actual.string = "if"
+					self.actual.value = "if"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "ELSE":
+
+					self.actual.string = "else"
+					self.actual.value = "else"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "THEN":
+
+					self.actual.string = "then"
+					self.actual.value = "then"
+					self.position = i+1
+
+					return self.actual
+
 				else:
 
 					self.actual.string = "identifier"
@@ -361,6 +456,22 @@ class Tokenizer:
 
 				self.actual.string = "="
 				self.actual.value = "="
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == ">":
+
+				self.actual.string = ">"
+				self.actual.value = ">"
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == "<":
+
+				self.actual.string = "<"
+				self.actual.value = "<"
 				self.position = i+1
 
 				return self.actual
@@ -466,6 +577,8 @@ class Parser:
 
 			else:
 
+				print(nexttoken.value)
+
 				raise Exception ("Espera-se uma atribuicao")
 
 
@@ -487,6 +600,98 @@ class Parser:
 
 			return node
 
+		elif nexttoken.string == "while":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node_rel = Parser.RelExpression()
+
+			print (nexttoken.value)
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			print (nexttoken.value)
+
+			node_true = Parser.Statement()
+
+			print (nexttoken.value)
+
+			#nexttoken = Parser.tokens.selectNext() 
+
+			print (nexttoken.value)
+
+			if nexttoken.string != "wend":
+
+				raise Exception ("Espara-se um wend")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			node = WhileOp("while",[node_rel,node_true])
+
+			return node
+
+
+		elif nexttoken.string == "if":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			print (nexttoken.value)
+
+			node_rel = Parser.RelExpression()
+
+			#nexttoken = Parser.tokens.selectNext() 
+
+			print (nexttoken.value)
+
+			if nexttoken.string != "then":
+
+				raise Exception ("Espara-se um then")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			print (nexttoken.value)
+
+			if nexttoken.string == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
+
+			print (nexttoken.value)
+
+			node_true = Parser.Statement()
+
+			#nexttoken = Parser.tokens.selectNext() 
+
+			print (nexttoken.value)
+
+			value = "if"
+			node_else = 0
+
+			if nexttoken.string == "else":
+
+				value = "else"
+
+				nexttoken = Parser.tokens.selectNext()
+
+				node_else = Parser.Statement()
+
+				#nexttoken = Parser.tokens.selectNext()
+
+			elif nexttoken.string != "end":
+
+				raise Exception ("Espara-se um 'end' de if")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "if":
+
+				raise Exception ("Espara-se um 'if' de end if")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			node = IfOp(value,[node_rel,node_true,node_else])
+
+			return node
+
 
 		elif nexttoken.string == "\n":
 
@@ -499,6 +704,21 @@ class Parser:
 
 			raise Exception ("Algo deu ruim")
 
+	def RelExpression():
+
+		nexttoken = Parser.tokens.actual
+
+		node1 = Parser.parserExpression()
+
+		comp_signal = nexttoken.string
+
+		nexttoken = Parser.tokens.selectNext()
+
+		node2 = Parser.parserExpression()
+
+		node = BinOp(comp_signal,[node1,node2])
+
+		return node
 
 
 	def factor():
@@ -585,6 +805,7 @@ class Parser:
 				nexttoken = Parser.tokens.selectNext()
 
 				soma =  Parser.factor()
+
 				node = BinOp("division",[node,soma])
 						
 
