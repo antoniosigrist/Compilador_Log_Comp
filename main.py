@@ -308,9 +308,6 @@ class Tokenizer:
 
 						i += 1	
 
-					
-					#self.position += 1  ### REVER ISSO AQUI
-
 			
 
 			if str(self.origin[i]).isdigit():

@@ -1,27 +1,26 @@
-if -20 > -7 then
+'sub main
 
-	x =  10 '*10/1*(0+1)
+dim y as integer
+dim xx as integer
+dim inp as boolean
+'dim z as integer
+dim x as boolean
 
-else
+xx = 99
+y = 50
+x = False
 
-	x = -11
+while xx<101
 
-end if
-
-y=0
-
-while y < 2
-
-	xx = 1 + y 'define xx
-
-	print xx*y
-
-	y = y + 1 ' define y
-
-wend
+	dim h as integer
+	h = xx + y
+	xx = h
+	xx = x
 
 ' linha de baixo pede input
 
-inp = input
+wend
 
-print xx * y - x - inp ' espera o resultado (-6 - valor do input) 
+inp = False
+
+'print inp ' espera o resultado (-6 - valor do input) 
