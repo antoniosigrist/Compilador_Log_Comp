@@ -28,7 +28,7 @@ class StatementsOp(Node):
 
 			child.Evaluate(ST)
 
-			print(ST.ST)
+			#print(ST.ST)
 
 class TypeOp(Node):
 
@@ -82,15 +82,11 @@ class Assignment(Node):
 
 		if var != None:
 
-			ST.remove(self.children[0].upper())
-
 			children1 = self.children[1].Evaluate(ST)
-			print("oi")
-			print(var[1])
-			print(children1[1])
 
 			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
+				ST.remove(self.children[0].upper())
 				ST.setter(self.children[0], children1)
 
 			else:
@@ -109,9 +105,7 @@ class WhileOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST):
-		print("ABACATE")
-		print("ABACATE"+str(self.children[0].Evaluate(ST)))
-		print("hhh")
+		
 		while self.children[0].Evaluate(ST)[0] == True:
 
 			self.children[1].Evaluate(ST)
@@ -157,8 +151,6 @@ class SymbolTable:
 
 		if key in self.ST:
 
-			print ("getter: "+ str(self.ST[key]))
-
 			return self.ST[key]
 
 		else:
@@ -200,10 +192,6 @@ class BinOp(Node):
 			children0 = self.children[0].Evaluate(ST)
 
 			children1 = self.children[1].Evaluate(ST)
-
-			print("biidi: "+str(children1[1]))
-
-			print(children0[1])
 
 			if children1[1] != children0[1]:
 
@@ -735,11 +723,14 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
+
 		if nexttoken.string != "sub":
 
 			raise Exception ("Faltou sub")
 
 		nexttoken = Parser.tokens.selectNext()
+
+
 
 		if nexttoken.string != "main":
 
@@ -747,7 +738,9 @@ class Parser:
 
 		nexttoken = Parser.tokens.selectNext()
 
-		main_return = Parser.Statements().Evaluate()
+
+		main_return = Parser.Statements()
+
 
 		if nexttoken.string != "end":
 
@@ -758,6 +751,8 @@ class Parser:
 		if nexttoken.string != "sub":
 
 			raise Exception ("Faltou sub na main")
+
+		nexttoken = Parser.tokens.selectNext()
 
 		return main_return
 
@@ -789,8 +784,6 @@ class Parser:
 	def Statement():
 
 		nexttoken = Parser.tokens.actual
-
-		print (nexttoken.value)
 
 		if nexttoken.string == "identifier":
 
@@ -886,8 +879,6 @@ class Parser:
 
 				raise Exception ("Espara-se um then")
 
-			print(nexttoken.string)
-
 			nexttoken = Parser.tokens.selectNext()
 
 			node_true = Parser.Statements()
@@ -955,8 +946,6 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		print (nexttoken.value)
-
 		soma = 0
 
 		if nexttoken.string == "int":
@@ -971,8 +960,6 @@ class Parser:
 		elif nexttoken.string == "boolean":
 
 			node = BoolVal(Parser.tokens.actual.value,[])
-
-			print("Entrou aqui")
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -1122,7 +1109,7 @@ class Parser:
 		Parser.tokens = Tokenizer(code)
 		Parser.tokens.selectNext()
 
-		res = Parser.Statements()
+		res = Parser.Main()
 
 		if Parser.tokens.actual.string == "EOF":
 
