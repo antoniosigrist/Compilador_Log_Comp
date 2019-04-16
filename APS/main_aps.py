@@ -28,7 +28,8 @@ class StatementsOp(Node):
 
 			child.Evaluate(ST)
 
-class PrintOp(Node):
+
+class TypeOp(Node):
 
 	def __init__(self,value,children):
 
@@ -37,7 +38,31 @@ class PrintOp(Node):
 
 	def Evaluate(self,ST):
 
-		print(self.children[0].Evaluate(ST))
+		if self.children[0] == "int":
+
+			return "integer"
+
+		elif self.children[0] == "bool":
+
+			return "boolean"
+
+		else:
+
+			raise Exception ("Espera-se tipos integer or boolean")
+
+		
+
+class PrintOp(Node):
+
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		print(self.children[0].Evaluate(ST)[0])
 
 
 
@@ -50,7 +75,25 @@ class Assignment(Node):
 
 	def Evaluate(self,ST):
 
-		ST.setter(self.children[0], self.children[1].Evaluate(ST))
+
+		var = ST.getter(self.children[0].upper())
+
+		if var != None:
+
+			children1 = self.children[1].Evaluate(ST)
+
+			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
+
+				ST.remove(self.children[0].upper())
+				ST.setter(self.children[0], children1)
+
+			else:
+
+				raise Exception ("Variavel '"+str(self.children[0])+"' nao é do tipo que está sendo atribuida" )
+
+		else:
+
+			raise Exception ("Variavel '"+str(self.children[0])+"' nao declarada" )
 
 class WhileOp(Node):
 
@@ -60,8 +103,8 @@ class WhileOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST):
-
-		while self.children[0].Evaluate(ST) == True:
+		
+		while self.children[0].Evaluate(ST)[0] == True:
 
 			self.children[1].Evaluate(ST)
 
@@ -77,7 +120,7 @@ class IfOp(Node):
 
 		if self.value == "if":
 
-			if self.children[0].Evaluate(ST) == True:
+			if self.children[0].Evaluate(ST)[0] == True:
 
 				self.children[1].Evaluate(ST)
 
@@ -86,8 +129,8 @@ class IfOp(Node):
 				pass
 
 		elif self.value == "else":
-
-			if self.children[0].Evaluate(ST) == True:
+			
+			if self.children[0].Evaluate(ST)[0] == True:
 
 				self.children[1].Evaluate(ST)
 
@@ -110,13 +153,22 @@ class SymbolTable:
 
 		else:
 
-			return False
+			return None
 
 
 	def setter(self,key,value):
 
 		self.ST.update({key: value})
 
+	def remove(self,key):
+
+		del self.ST[key]
+
+class BlockTable:
+
+	def __init__ (self):
+
+		self.BT = []
 
 
 class Identifier(Node):
@@ -139,44 +191,59 @@ class BinOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST):
-		
+			
+			children0 = self.children[0].Evaluate(ST)
 
-			if self.value == "plus":
+			children1 = self.children[1].Evaluate(ST)
 
-				return self.children[0].Evaluate(ST) + self.children[1].Evaluate(ST)
+			if children1[1] != children0[1]:
 
-			if self.value == "minus":
+				raise Exception ("Não pode fazer conta com variaveis de tipos diferentes")
 
-				return self.children[0].Evaluate(ST) - self.children[1].Evaluate(ST)
+			else:
 
-			if self.value == "times":
+				if self.value == "plus":
 
-				return self.children[0].Evaluate(ST) * self.children[1].Evaluate(ST)
+					return (children0[0] + children1[0] , children0[1])
 
-			if self.value == "division":
+				if self.value == "minus":
 
-				return self.children[0].Evaluate(ST) // self.children[1].Evaluate(ST)
+					return (children0[0] - children1[0] , children0[1])
 
-			if self.value == "=":
+				if self.value == "times":
 
-				return self.children[0].Evaluate(ST) == self.children[1].Evaluate(ST)
+					return (children0[0] * children1[0] , children0[1])
 
-			if self.value == ">":
+				if self.value == "division":
 
-				return self.children[0].Evaluate(ST) > self.children[1].Evaluate(ST)
+					return (children0[0] // children1[0] , children0[1])
 
-			if self.value == "<":
+				if self.value == "=":
 
-				return self.children[0].Evaluate(ST) < self.children[1].Evaluate(ST)
+					return (children0[0] == children1[0] , children0[1])
 
-			if self.value == "and":
+				if self.value == "and":
 
-				return self.children[0].Evaluate(ST) and self.children[1].Evaluate(ST)
+					return (children0[0] and children1[0] , children0[1])
 
-			if self.value == "or":
+				if self.value == "or":
 
-				return self.children[0].Evaluate(ST) or self.children[1].Evaluate(ST)
-				
+					return (children0[0] or children1[0] , children0[1])
+
+				if children0[1] == "boolean" or children1[1] == "boolean":
+
+					raise Exception("Não se pode fazer operadores < ou > com booleanos")
+
+				if self.value == ">":
+
+					return (children0[0] > children1[0] , children0[1])
+
+				if self.value == "<":
+
+					return (children0[0] < children1[0] , children0[1])
+
+			
+			
 
 class UnOp(Node):
 
@@ -193,12 +260,11 @@ class UnOp(Node):
 
 		if self.value == "minus":
 
-			return - self.children[0].Evaluate(ST)
+			return (-self.children[0].Evaluate(ST)[0],"integer")
 
 		if self.value == "not":
 
 			return not self.children[0].Evaluate(ST)
-	
 
 class IntVal(Node):
 
@@ -209,7 +275,20 @@ class IntVal(Node):
 
 	def Evaluate(self,ST):
 
-		return self.value
+		return (self.value,"integer")
+
+
+class BoolVal(Node):
+
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		return (self.value,"boolean")
 
 
 class InputOp(Node):
@@ -221,7 +300,7 @@ class InputOp(Node):
 
 	def Evaluate(self,ST):
 
-		return int(input("Insira um número: \n"))
+		return (int(input("Insira um número: \n")),"integer")
 
 
 class VarVal(Node):
@@ -248,12 +327,31 @@ class NoOp(Node):
 		pass
 
 
+class VarDec(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST):
+
+		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
+
+
+
+
+
+
 class Token:
 
 	def __init__(self,string,value):
 
 		self.string = string
 		self.value = value
+
+
+
 
 class Tokenizer:
 
@@ -280,7 +378,7 @@ class Tokenizer:
 		for i in range(self.position,len(self.origin)):
 
 	
-			while self.origin[i] == " " or self.origin[i] == "	" :
+			while self.origin[i] == " " or self.origin[i] == "	":
 
 				i+=1
 
@@ -427,6 +525,38 @@ class Tokenizer:
 
 					return self.actual
 
+				elif variable == "TRUE":
+
+					self.actual.string = "boolean"
+					self.actual.value = True
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "BOOLEAN":
+
+					self.actual.string = "boolean"
+					self.actual.value = "boolean"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "INTEGER":
+
+					self.actual.string = "integer"
+					self.actual.value = "integer"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "FALSE":
+
+					self.actual.string = "boolean"
+					self.actual.value = False
+					self.position = i+1
+
+					return self.actual
+
 				elif variable == "NOT":
 
 					self.actual.string = "not"
@@ -439,6 +569,38 @@ class Tokenizer:
 
 					self.actual.string = "input"
 					self.actual.value = "input"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "SUB":
+
+					self.actual.string = "sub"
+					self.actual.value = "sub"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "MAIN":
+
+					self.actual.string = "main"
+					self.actual.value = "main"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "INT":
+
+					self.actual.string = "int"
+					self.actual.value = "int"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "BOOL":
+
+					self.actual.string = "bool"
+					self.actual.value = "bool"
 					self.position = i+1
 
 					return self.actual
@@ -479,6 +641,10 @@ class Tokenizer:
 				self.position = i+1
 
 				return self.actual
+
+			elif self.origin[i] == "	":
+
+				pass
 
 			elif self.origin[i] == "/":
 
@@ -559,16 +725,29 @@ class Tokenizer:
 
 class Parser:
 
+	def Main(BT):
 
-	def Statements():
+		nexttoken = Parser.tokens.actual
+
+		main_return = Parser.Statements(BT)
+
+		while nexttoken.string != "EOF":
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+		return main_return
+
+
+	def Statements(BT):
 
 		children = []
 		
 		nexttoken = Parser.tokens.actual
 
-		while nexttoken.string != "EOF" and nexttoken.string != "end" and nexttoken.string != "wend" and nexttoken.string != "else":
+		while nexttoken.string != "EOF" and nexttoken.string != "else" and nexttoken.value not in BT.BT:
 
-			child = Parser.Statement()
+			child = Parser.Statement(BT)
 
 			if child != None:
 
@@ -584,11 +763,11 @@ class Parser:
 
 
 
-	def Statement():
+	def Statement(BT):
 
 		nexttoken = Parser.tokens.actual
 
-		if nexttoken.string == "identifier":
+		if nexttoken.string == "identifier" and nexttoken.value not in BT.BT:
 
 			identifier = Identifier(nexttoken.value,[])
 
@@ -604,6 +783,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext() 
 
+
 				return node
 
 			else:
@@ -612,6 +792,23 @@ class Parser:
 
 				raise Exception ("Espera-se uma atribuicao")
 
+		if nexttoken.string == "int" or nexttoken.string == "bool":
+
+			tipo_identificador = nexttoken.string
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			identifier = nexttoken.value
+
+			tipoop = TypeOp("var",[tipo_identificador])
+
+			tipo = None
+
+			node = VarDec("var", [identifier , tipo , tipoop])
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			return node
 
 		elif nexttoken.string == "print":
 
@@ -625,7 +822,7 @@ class Parser:
 
 		elif nexttoken.string == "begin":
 
-			node = Parser.Statements()
+			node = Parser.Statements(BT)
 
 			nexttoken = Parser.tokens.selectNext() 
 
@@ -637,13 +834,19 @@ class Parser:
 
 			node_rel = Parser.RelExpression()
 
-			nexttoken = Parser.tokens.selectNext() 
+			if nexttoken.string != "identifier":
 
-			node_true = Parser.Statements()
+				raise Exception ("Não foi aberto o bloco while")
 
-			if nexttoken.string != "wend":
+			BT.BT.append(nexttoken.value)
 
-				raise Exception ("Espara-se um wend")
+			nexttoken = Parser.tokens.selectNext()
+
+			node_true = Parser.Statements(BT)
+
+			if nexttoken.value != BT.BT.pop():
+
+				raise Exception ("O bloco while não foi fechado corretamente")
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -658,17 +861,17 @@ class Parser:
 
 			node_rel = Parser.RelExpression()
 
+			if nexttoken.string != "identifier":
 
-			id_block = nexttoken.value 
+				raise Exception ("Espara-se um then")
 
-			print(nexttoken.string)
+			BT.BT.append(nexttoken.value)
 
 			nexttoken = Parser.tokens.selectNext()
 
-			node_true = Parser.Statements()
+			node_true = Parser.Statements(BT)
 
 			value = "if"
-			
 			node_else = None
 
 
@@ -678,18 +881,13 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				node_else = Parser.Statements()
+				node_else = Parser.Statements(BT)
 
 
-			if nexttoken.string != "end":
+			if nexttoken.value != BT.BT.pop():
 
-				raise Exception ("Espara-se um 'end' de if")
-
-			nexttoken = Parser.tokens.selectNext()
-
-			if nexttoken.string != "if":
-
-				raise Exception ("Espara-se um 'if' de end if")
+				raise Exception ("Bloco fechado erroneamente")
+				
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -707,7 +905,7 @@ class Parser:
 
 			print(nexttoken.string)
 
-			raise Exception ("Algo deu ruim")
+			raise Exception ("Algo deu ruim com o token: "+str(nexttoken.value))
 
 	def RelExpression():
 
@@ -735,6 +933,15 @@ class Parser:
 		if nexttoken.string == "int":
 
 			node = IntVal(Parser.tokens.actual.value,[])
+
+			nexttoken = Parser.tokens.selectNext()
+
+			return node
+
+
+		elif nexttoken.string == "boolean":
+
+			node = BoolVal(Parser.tokens.actual.value,[])
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -871,7 +1078,6 @@ class Parser:
 				nexttoken = Parser.tokens.selectNext()
 
 				soma =  Parser.factor()
-
 				node = BinOp("or",[node,soma])
 						
 
@@ -879,12 +1085,12 @@ class Parser:
 			
 
 	@staticmethod
-	def run(code):
+	def run(code,BT):
 
 		Parser.tokens = Tokenizer(code)
 		Parser.tokens.selectNext()
 
-		res = Parser.Statements()
+		res = Parser.Main(BT)
 
 		if Parser.tokens.actual.string == "EOF":
 
@@ -904,7 +1110,8 @@ with open(file_name) as testfile:
 
 
 ST1 = SymbolTable()
+BT = BlockTable()
 
-Parser.run(string).Evaluate(ST1)
+Parser.run(string,BT).Evaluate(ST1)
 
 print("ST = ",ST1.ST)

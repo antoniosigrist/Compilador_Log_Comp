@@ -1,5 +1,25 @@
-if 0 < 7 ababa
-	x = 10 
-ababa if
+int x
+bool y
 
-print x
+x = 0
+y = true
+
+if 0 < 7 ababa
+	
+	while x < 10 Blocowhile
+
+		if x > 5 Blocoxis
+
+			x = x + 2
+
+		else
+
+			x = x + 1
+
+		Blocoxis
+
+	Blocowhile
+
+ababa
+
+print y

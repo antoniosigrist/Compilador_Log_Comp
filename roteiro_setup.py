@@ -63,8 +63,7 @@ class PrintOp(Node):
 
 	def Evaluate(self,ST):
 
-
-		print(self.children[0].Evaluate(ST))
+		print(self.children[0].Evaluate(ST)[0])
 
 
 
@@ -122,7 +121,7 @@ class IfOp(Node):
 
 		if self.value == "if":
 
-			if self.children[0].Evaluate(ST) == True:
+			if self.children[0].Evaluate(ST)[0] == True:
 
 				self.children[1].Evaluate(ST)
 
@@ -131,8 +130,8 @@ class IfOp(Node):
 				pass
 
 		elif self.value == "else":
-
-			if self.children[0].Evaluate(ST) == True:
+			
+			if self.children[0].Evaluate(ST)[0] == True:
 
 				self.children[1].Evaluate(ST)
 
@@ -335,15 +334,17 @@ class VarDec(Node):
 
 		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
 
+
+
+
+
+
 class Token:
 
 	def __init__(self,string,value):
 
 		self.string = string
 		self.value = value
-
-
-
 
 
 
@@ -373,7 +374,7 @@ class Tokenizer:
 		for i in range(self.position,len(self.origin)):
 
 	
-			while self.origin[i] == " " or self.origin[i] == "	" :
+			while self.origin[i] == " " or self.origin[i] == "	":
 
 				i+=1
 
@@ -753,6 +754,12 @@ class Parser:
 			raise Exception ("Faltou sub na main")
 
 		nexttoken = Parser.tokens.selectNext()
+		
+
+		while nexttoken.string != "EOF":
+
+			nexttoken = Parser.tokens.selectNext()
+
 
 		return main_return
 
@@ -891,6 +898,8 @@ class Parser:
 			if nexttoken.string == "else":
 				
 				value = "else"
+
+				print(value)
 
 				nexttoken = Parser.tokens.selectNext()
 
@@ -1096,7 +1105,6 @@ class Parser:
 				nexttoken = Parser.tokens.selectNext()
 
 				soma =  Parser.factor()
-
 				node = BinOp("or",[node,soma])
 						
 

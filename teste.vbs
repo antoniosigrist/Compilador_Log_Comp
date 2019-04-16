@@ -10,17 +10,40 @@ xx = 99
 y = 50
 x = False
 
-while xx<101
+while xx<105
 
-	xx = xx*2
+	xx = xx+1
 	Y = y - xx
 
 ' linha de baixo pede input
 
 wend
 
-inp = False
 
-'print inp ' espera o resultado (-6 - valor do input) 
+if xx > 2 then
+
+	print xx
+	inp = True
+
+else
+
+	inp = False
+
+end if
+
+print inp ' espera false
 
 end sub
+
+
+
+
+
+
+
+
+
+
+
+
+
