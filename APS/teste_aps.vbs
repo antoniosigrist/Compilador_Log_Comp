@@ -1,5 +1,5 @@
-int x = 19 * 98
-bool y = true
+int x = 19 * 98 - 1/2
+bool y = tRUE
 
 
 'y = true

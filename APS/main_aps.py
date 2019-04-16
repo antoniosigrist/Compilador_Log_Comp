@@ -341,10 +341,12 @@ class VarDec(Node):
 			ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
 
 		else:
-			print (self.children[1].Evaluate(ST)[0])
+
 			ST.setter(self.children[0], (self.children[1].Evaluate(ST)[0],self.children[2].Evaluate(ST)))
 
+			if (type(self.children[1].Evaluate(ST)[0]) == bool and self.children[2].Evaluate(ST) != "boolean") or (type(self.children[1].Evaluate(ST)[0]) == int and self.children[2].Evaluate(ST) != "integer") :
 
+				raise Exception ("Declaracao inconsistente entre int e bool")
 
 
 
