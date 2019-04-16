@@ -336,7 +336,13 @@ class VarDec(Node):
 
 	def Evaluate(self,ST):
 
-		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
+		if self.value == "var":
+
+			ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
+
+		else:
+			print (self.children[1].Evaluate(ST)[0])
+			ST.setter(self.children[0], (self.children[1].Evaluate(ST)[0],self.children[2].Evaluate(ST)))
 
 
 
@@ -804,11 +810,21 @@ class Parser:
 
 			tipo = None
 
-			node = VarDec("var", [identifier , tipo , tipoop])
+			nexttoken = Parser.tokens.selectNext()
 
-			nexttoken = Parser.tokens.selectNext() 
+			if nexttoken.string == "=":
 
-			return node
+				nexttoken = Parser.tokens.selectNext()
+					
+				node = VarDec("atr", [identifier , Parser.parserExpression() , tipoop])
+
+				return node
+
+			else:
+
+				node = VarDec("var", [identifier , tipo , tipoop])
+
+				return node
 
 		elif nexttoken.string == "print":
 

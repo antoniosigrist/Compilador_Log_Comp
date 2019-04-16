@@ -1,12 +1,12 @@
-int x
-bool y
+int x = 19 * 98
+bool y = true
 
-x = 0
-y = true
+
+'y = true
 
 if 0 < 7 ababa
 	
-	while x < 10 Blocowhile
+	while x < 17 Blocowhile
 
 		if x > 5 Blocoxis
 
