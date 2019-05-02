@@ -20,7 +20,7 @@ while xx<105
 wend
 
 
-if xx > 2 then
+if 2 < 4 then
 
 	print xx
 	inp = True

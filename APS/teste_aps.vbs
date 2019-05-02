@@ -1,16 +1,17 @@
 int x = 19 * 98 - 1/2
-bool y = tRUE
+bool y = fAlSe
 
 
 'y = true
 
-if 0 < 7 ababa
+if 0 < 7 abudabe
 	
 	while x < 17 Blocowhile
 
 		if x > 5 Blocoxis
 
 			x = x + 2
+			y=True
 
 		else
 
@@ -20,6 +21,8 @@ if 0 < 7 ababa
 
 	Blocowhile
 
-ababa
+abudabe
+
+y= true
 
 print y

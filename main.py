@@ -792,8 +792,6 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		print(nexttoken.value)
-
 		if nexttoken.string == "identifier":
 
 			identifier = Identifier(nexttoken.value,[])
