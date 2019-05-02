@@ -405,19 +405,6 @@ init_declarator_list
 
 iteration_statement
 	: WHILE expression IDENTIFIER statement IDENTIFIER {$$ = new WhileLoopNode($3,$5);}
-	| DO statement WHILE '(' expression ')' ';' {$$ = new DoWhileLoopNode($5,$2);}
-	| FOR '(' expression_statement expression_statement ')' statement{
-		$$ = new ForLoopNode($3,$4,NULL,$6);
-	}
-	| FOR '(' expression_statement expression_statement expression ')' statement{
-		$$ = new ForLoopNode($3,$4,$5,$7);
-	}
-	| FOR '(' declaration expression_statement ')' statement{
-		$$ = new ForLoopNode($3,$4,NULL,$6);
-	}
-	| FOR '(' declaration expression_statement expression ')' statement {
-		$$ = new ForLoopNode($3,$4,$5,$7);
-	}
 	;
 
 jump_statement
