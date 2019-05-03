@@ -222,7 +222,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "c.y"
+#line 4 "c.y"
 
 #include "node.h"
 #include <cstdio>
@@ -259,7 +259,7 @@ bool debug = false;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 17 "c.y"
+#line 20 "c.y"
 {
 	BlockNode *block;
 	ExprNode *expr;
@@ -693,34 +693,34 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    89,    89,    93,    94,    95,   101,   102,   107,   108,
-     113,   114,   115,   116,   117,   118,   119,   120,   121,   122,
-     123,   127,   131,   132,   136,   137,   141,   142,   146,   160,
-     161,   162,   168,   169,   176,   186,   191,   196,   201,   206,
-     212,   217,   221,   226,   229,   230,   231,   235,   236,   242,
-     243,   244,   245,   246,   247,   248,   249,   250,   251,   252,
-     253,   259,   260,   264,   268,   269,   273,   274,   278,   279,
-     280,   281,   282,   283,   284,   285,   286,   287,   288,   289,
-     290,   291,   292,   293,   294,   295,   296,   297,   298,   303,
-     307,   308,   309,   310,   311,   315,   316,   320,   321,   327,
-     328,   333,   334,   339,   340,   348,   349,   354,   358,   359,
-     363,   364,   368,   369,   374,   375,   376,   380,   381,   382,
-     383,   391,   396,   402,   403,   407,   411,   412,   413,   414,
-     415,   419,   420,   421,   427,   432,   437,   438,   445,   450,
-     451,   455,   456,   457,   458,   462,   466,   470,   475,   476,
-     477,   478,   482,   486,   487,   488,   489,   490,   491,   495,
-     496,   500,   501,   502,   503,   504,   505,   509,   510,   511,
-     515,   516,   520,   522,   525,   526,   527,   532,   533,   537,
-     538,   539,   544,   545,   549,   550,   554,   555,   556,   557,
-     561,   562,   567,   568,   569,   570,   571,   572,   573,   574,
-     575,   576,   577,   578,   579,   580,   581,   582,   586,   587,
-     588,   589,   590,   591,   596,   597,   598,   599,   600,   604,
-     605,   606,   607,   608,   609,   610,   613,   616,   617,   621,
-     622,   625,   628,   640,   641,   642,   646,   647,   651,   652,
-     653,   654,   658,   659,   660,   664,   665,   666,   670,   671,
-     672,   673,   674,   678,   679,   681,   686,   687,   691,   692,
-     696,   697,   700,   701,   705,   706,   710,   711,   715,   716,
-     724,   728,   729
+       0,    92,    92,    96,    97,    98,   104,   105,   110,   111,
+     116,   117,   118,   119,   120,   121,   122,   123,   124,   125,
+     126,   130,   134,   135,   139,   140,   144,   145,   149,   163,
+     164,   165,   171,   172,   179,   189,   194,   199,   204,   209,
+     215,   220,   224,   229,   232,   233,   234,   238,   239,   245,
+     246,   247,   248,   249,   250,   251,   252,   253,   254,   255,
+     256,   262,   263,   267,   271,   272,   276,   277,   281,   282,
+     283,   284,   285,   286,   287,   288,   289,   290,   291,   292,
+     293,   294,   295,   296,   297,   298,   299,   300,   301,   306,
+     310,   311,   312,   313,   314,   318,   319,   323,   324,   330,
+     331,   336,   337,   342,   343,   351,   352,   357,   361,   362,
+     366,   367,   371,   372,   377,   378,   379,   383,   384,   385,
+     386,   394,   399,   405,   406,   410,   414,   415,   416,   417,
+     418,   422,   423,   424,   430,   435,   440,   441,   448,   453,
+     454,   458,   459,   460,   461,   465,   469,   473,   478,   479,
+     480,   481,   485,   489,   490,   491,   492,   493,   494,   498,
+     499,   503,   504,   505,   506,   507,   508,   512,   513,   514,
+     518,   519,   523,   525,   528,   529,   530,   535,   536,   540,
+     541,   542,   547,   548,   552,   553,   557,   558,   559,   560,
+     564,   565,   570,   571,   572,   573,   574,   575,   576,   577,
+     578,   579,   580,   581,   582,   583,   584,   585,   589,   590,
+     591,   592,   593,   594,   599,   600,   601,   602,   603,   607,
+     608,   609,   610,   611,   612,   613,   616,   619,   620,   624,
+     625,   628,   631,   643,   644,   645,   649,   650,   654,   655,
+     656,   657,   661,   662,   663,   667,   668,   669,   673,   674,
+     675,   676,   677,   681,   682,   684,   689,   690,   694,   695,
+     699,   700,   703,   704,   708,   709,   713,   714,   718,   719,
+     727,   731,   732
 };
 #endif
 
@@ -2319,77 +2319,77 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 89 "c.y"
+#line 92 "c.y"
     { programBlock = (yyvsp[(1) - (1)].block); ;}
     break;
 
   case 3:
-#line 93 "c.y"
+#line 96 "c.y"
     {;}
     break;
 
   case 4:
-#line 94 "c.y"
+#line 97 "c.y"
     {;}
     break;
 
   case 5:
-#line 95 "c.y"
+#line 98 "c.y"
     {;}
     break;
 
   case 6:
-#line 101 "c.y"
+#line 104 "c.y"
     {;}
     break;
 
   case 7:
-#line 102 "c.y"
+#line 105 "c.y"
     {;}
     break;
 
   case 8:
-#line 107 "c.y"
+#line 110 "c.y"
     { (yyval.exprvec) = new ExpressionList(); (yyval.exprvec)->push_back((yyvsp[(1) - (1)].expr));;}
     break;
 
   case 9:
-#line 108 "c.y"
+#line 111 "c.y"
     { (yyvsp[(1) - (3)].exprvec)->push_back((yyvsp[(3) - (3)].expr));;}
     break;
 
   case 22:
-#line 131 "c.y"
+#line 134 "c.y"
     { (yyval.block) = new BlockNode(); (yyval.block)->statements.push_back((yyvsp[(1) - (1)].stmt)); ;}
     break;
 
   case 23:
-#line 132 "c.y"
+#line 135 "c.y"
     { (yyvsp[(1) - (2)].block)->statements.push_back((yyvsp[(2) - (2)].stmt)); ;}
     break;
 
   case 24:
-#line 136 "c.y"
+#line 139 "c.y"
     {;}
     break;
 
   case 25:
-#line 137 "c.y"
+#line 140 "c.y"
     {;}
     break;
 
   case 26:
-#line 141 "c.y"
+#line 144 "c.y"
     { (yyval.block) = new BlockNode(); ;}
     break;
 
   case 27:
-#line 142 "c.y"
+#line 145 "c.y"
     { (yyval.block)  = (yyvsp[(2) - (3)].block); ;}
     break;
 
   case 28:
-#line 146 "c.y"
+#line 149 "c.y"
     {
 		if(isdigit( ((yyvsp[(1) - (1)].string)->c_str())[0] )){
 			long val = atol((yyvsp[(1) - (1)].string)->c_str());
@@ -2407,22 +2407,22 @@ yyreduce:
     break;
 
   case 29:
-#line 160 "c.y"
+#line 163 "c.y"
     { (yyval.expr) = new DoubleNode(atof((yyvsp[(1) - (1)].string)->c_str())); delete (yyvsp[(1) - (1)].string);cout<<"Detected as IF__CONSTANT\n";  ;}
     break;
 
   case 30:
-#line 161 "c.y"
+#line 164 "c.y"
     { (yyval.expr) = new BoolNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string);cout<<"Detected as B__CONSTANT\n" ; ;}
     break;
 
   case 32:
-#line 168 "c.y"
+#line 171 "c.y"
     {;}
     break;
 
   case 33:
-#line 169 "c.y"
+#line 172 "c.y"
     {
 
 		 if((new CHK_TYPE())->isFunc(*(yyvsp[(2) - (3)].var_init)))
@@ -2433,7 +2433,7 @@ yyreduce:
     break;
 
   case 35:
-#line 186 "c.y"
+#line 189 "c.y"
     {
 
 		(yyvsp[(2) - (2)].common_dec)->setIsPtr(true);
@@ -2442,12 +2442,12 @@ yyreduce:
     break;
 
   case 36:
-#line 191 "c.y"
+#line 194 "c.y"
     { ;}
     break;
 
   case 37:
-#line 196 "c.y"
+#line 199 "c.y"
     {
 		cout<<"----dec_spec 1\n";
 		(yyval.var_stor) = new QualStorageTypeNode(NULL, (yyvsp[(1) - (2)].ident), (yyvsp[(2) - (2)].var_stor));
@@ -2456,7 +2456,7 @@ yyreduce:
     break;
 
   case 38:
-#line 201 "c.y"
+#line 204 "c.y"
     {
 cout<<"----dec_spec 2\n";
 		(yyval.var_stor) = new QualStorageTypeNode();
@@ -2465,7 +2465,7 @@ cout<<"----dec_spec 2\n";
     break;
 
   case 39:
-#line 206 "c.y"
+#line 209 "c.y"
     {
 cout<<"----dec_spec 3\n";
 		/* $$ = new QualStorageTypeNode($<var_stor>2); */
@@ -2475,7 +2475,7 @@ cout<<"----dec_spec 3\n";
     break;
 
   case 40:
-#line 212 "c.y"
+#line 215 "c.y"
     {
 cout<<"----dec_spec 4 (type_specifier)\n";
 		 (yyval.var_stor) = new QualStorageTypeNode();
@@ -2484,7 +2484,7 @@ cout<<"----dec_spec 4 (type_specifier)\n";
     break;
 
   case 41:
-#line 217 "c.y"
+#line 220 "c.y"
     {
 cout<<"----dec_spec 5\n";
 		(yyvsp[(2) - (2)].var_stor)->setQualifier((yyvsp[(1) - (2)].ident));
@@ -2492,7 +2492,7 @@ cout<<"----dec_spec 5\n";
     break;
 
   case 42:
-#line 221 "c.y"
+#line 224 "c.y"
     {
 cout<<"----dec_spec 6\n";
 		(yyval.var_stor) = new QualStorageTypeNode();
@@ -2501,84 +2501,84 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 43:
-#line 226 "c.y"
+#line 229 "c.y"
     {
 		cout<<"----dec_spec 7\n";
 	;}
     break;
 
   case 44:
-#line 229 "c.y"
+#line 232 "c.y"
     {cout<<"----dec_spec 8\n";;}
     break;
 
   case 45:
-#line 230 "c.y"
+#line 233 "c.y"
     {cout<<"----dec_spec 9\n";;}
     break;
 
   case 46:
-#line 231 "c.y"
+#line 234 "c.y"
     {cout<<"----dec_spec 10\n";;}
     break;
 
   case 49:
-#line 242 "c.y"
+#line 245 "c.y"
     {(yyval.common_dec) = new AssignmentNode(new IdentiferNode(*(yyvsp[(1) - (1)].string))); delete (yyvsp[(1) - (1)].string);  ;}
     break;
 
   case 50:
-#line 243 "c.y"
+#line 246 "c.y"
     {(yyval.common_dec) = new AssignmentNode(new IdentiferNode(*(yyvsp[(2) - (3)].expr)));cout<<"----dir_dec: \"(declarator)\"(2)"<<endl;;}
     break;
 
   case 51:
-#line 244 "c.y"
-    {;}
-    break;
-
-  case 52:
-#line 245 "c.y"
-    {;}
-    break;
-
-  case 53:
-#line 246 "c.y"
-    {;}
-    break;
-
-  case 54:
 #line 247 "c.y"
     {;}
     break;
 
-  case 55:
+  case 52:
 #line 248 "c.y"
     {;}
     break;
 
-  case 56:
+  case 53:
 #line 249 "c.y"
     {;}
     break;
 
-  case 57:
+  case 54:
 #line 250 "c.y"
     {;}
     break;
 
-  case 58:
+  case 55:
 #line 251 "c.y"
     {;}
     break;
 
-  case 59:
+  case 56:
 #line 252 "c.y"
     {;}
     break;
 
-  case 60:
+  case 57:
 #line 253 "c.y"
+    {;}
+    break;
+
+  case 58:
+#line 254 "c.y"
+    {;}
+    break;
+
+  case 59:
+#line 255 "c.y"
+    {;}
+    break;
+
+  case 60:
+#line 256 "c.y"
     {
 
 		 (yyvsp[(3) - (4)].identparam)->setId((yyvsp[(1) - (4)].common_dec));
@@ -2588,47 +2588,47 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 61:
-#line 259 "c.y"
+#line 262 "c.y"
     { (yyval.common_dec) = new NIdentifierParam(*(yyvsp[(1) - (3)].common_dec), true);;}
     break;
 
   case 62:
-#line 260 "c.y"
+#line 263 "c.y"
     {;}
     break;
 
   case 68:
-#line 278 "c.y"
+#line 281 "c.y"
     {{};}
     break;
 
   case 99:
-#line 327 "c.y"
+#line 330 "c.y"
     {cout<<"----ext_dec 1 (func_def)\n";;}
     break;
 
   case 100:
-#line 328 "c.y"
+#line 331 "c.y"
     {cout<<"----ext_dec 2 (dec)";;}
     break;
 
   case 101:
-#line 333 "c.y"
+#line 336 "c.y"
     {;}
     break;
 
   case 102:
-#line 334 "c.y"
+#line 337 "c.y"
     {cout<<"----exp_stmt: expression ;"<<endl;;}
     break;
 
   case 103:
-#line 339 "c.y"
+#line 342 "c.y"
     {cout<<"--func_def 1\n";;}
     break;
 
   case 104:
-#line 340 "c.y"
+#line 343 "c.y"
     {
 		cout<<"--func_def 2(dec_spec declarator compound_statement)\n";
 		// TODO this can be a struct also
@@ -2637,32 +2637,32 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 114:
-#line 374 "c.y"
+#line 377 "c.y"
     {cout<<"----initializer 1"<<endl;;}
     break;
 
   case 115:
-#line 375 "c.y"
+#line 378 "c.y"
     {cout<<"----initializer 2"<<endl;;}
     break;
 
   case 116:
-#line 376 "c.y"
+#line 379 "c.y"
     {cout<<"----initializer 3"<<endl;;}
     break;
 
   case 117:
-#line 380 "c.y"
+#line 383 "c.y"
     {cout<<"----init_list 1"<<endl;;}
     break;
 
   case 118:
-#line 381 "c.y"
+#line 384 "c.y"
     {cout<<"----init_list 2"<<endl;;}
     break;
 
   case 121:
-#line 391 "c.y"
+#line 394 "c.y"
     {
 		cout<<"----in_dec 1 (declarator = initializer)"<<endl;
 		(yyval.var_init) = new AssignmentNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
@@ -2671,37 +2671,37 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 122:
-#line 396 "c.y"
+#line 399 "c.y"
     {;}
     break;
 
   case 123:
-#line 402 "c.y"
+#line 405 "c.y"
     {;}
     break;
 
   case 124:
-#line 403 "c.y"
+#line 406 "c.y"
     {;}
     break;
 
   case 125:
-#line 407 "c.y"
+#line 410 "c.y"
     {(yyval.stmt) = new WhileLoopNode((yyvsp[(3) - (5)].string),(yyvsp[(5) - (5)].string));;}
     break;
 
   case 129:
-#line 414 "c.y"
+#line 417 "c.y"
     {(yyval.stmt) = new ReturnStatementNode();;}
     break;
 
   case 130:
-#line 415 "c.y"
+#line 418 "c.y"
     {(yyval.stmt) = new ReturnStatementNode((yyvsp[(2) - (3)].expr));;}
     break;
 
   case 134:
-#line 427 "c.y"
+#line 430 "c.y"
     {(yyval.identparam) = new NIdentifierParam(*(yyvsp[(1) - (3)].varvec));
 		(yyval.identparam)->setEllipsis(true);
 
@@ -2710,22 +2710,22 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 135:
-#line 432 "c.y"
+#line 435 "c.y"
     { (yyval.identparam) = new NIdentifierParam(*(yyvsp[(1) - (1)].varvec)); ;}
     break;
 
   case 136:
-#line 437 "c.y"
+#line 440 "c.y"
     { (yyval.varvec) = new VariableList(); (yyval.varvec)->push_back((yyvsp[(1) - (1)].var_decl)); ;}
     break;
 
   case 137:
-#line 438 "c.y"
+#line 441 "c.y"
     { (yyvsp[(1) - (3)].varvec)->push_back((yyvsp[(3) - (3)].var_decl)); ;}
     break;
 
   case 138:
-#line 445 "c.y"
+#line 448 "c.y"
     {
 		 (yyval.var_decl) = new VariableDeclaration(*(yyvsp[(1) - (2)].var_stor), *(yyvsp[(2) - (2)].expr));
 
@@ -2734,37 +2734,37 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 139:
-#line 450 "c.y"
+#line 453 "c.y"
     {;}
     break;
 
   case 140:
-#line 451 "c.y"
+#line 454 "c.y"
     {;}
     break;
 
   case 141:
-#line 455 "c.y"
-    {;}
-    break;
-
-  case 142:
-#line 456 "c.y"
-    {;}
-    break;
-
-  case 143:
-#line 457 "c.y"
-    {;}
-    break;
-
-  case 144:
 #line 458 "c.y"
     {;}
     break;
 
+  case 142:
+#line 459 "c.y"
+    {;}
+    break;
+
+  case 143:
+#line 460 "c.y"
+    {;}
+    break;
+
+  case 144:
+#line 461 "c.y"
+    {;}
+    break;
+
   case 145:
-#line 462 "c.y"
+#line 465 "c.y"
     {
 
 		(yyval.stmt) = new IfNode((yyvsp[(3) - (7)].string),(yyvsp[(5) - (7)].token),(yyvsp[(7) - (7)].string));
@@ -2772,7 +2772,7 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 146:
-#line 466 "c.y"
+#line 469 "c.y"
     {
 
 		(yyval.stmt) = new IfNode((yyvsp[(3) - (5)].string), (yyvsp[(5) - (5)].string));
@@ -2780,200 +2780,200 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 153:
-#line 486 "c.y"
-    {;}
-    break;
-
-  case 154:
-#line 487 "c.y"
-    {;}
-    break;
-
-  case 155:
-#line 488 "c.y"
-    {;}
-    break;
-
-  case 156:
 #line 489 "c.y"
     {;}
     break;
 
-  case 157:
+  case 154:
 #line 490 "c.y"
     {;}
     break;
 
-  case 158:
+  case 155:
 #line 491 "c.y"
     {;}
     break;
 
+  case 156:
+#line 492 "c.y"
+    {;}
+    break;
+
+  case 157:
+#line 493 "c.y"
+    {;}
+    break;
+
+  case 158:
+#line 494 "c.y"
+    {;}
+    break;
+
   case 159:
-#line 495 "c.y"
+#line 498 "c.y"
     {(yyval.expr) = new StringNode(*(yyvsp[(1) - (1)].string));delete (yyvsp[(1) - (1)].string);;}
     break;
 
   case 184:
-#line 549 "c.y"
+#line 552 "c.y"
     { (yyval.block) = new BlockNode(); (yyval.block)->statements.push_back((yyvsp[(1) - (1)].stmt)); ;}
     break;
 
   case 185:
-#line 550 "c.y"
+#line 553 "c.y"
     { (yyvsp[(1) - (2)].block)->statements.push_back((yyvsp[(2) - (2)].stmt)); ;}
     break;
 
   case 192:
-#line 567 "c.y"
-    { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
-    break;
-
-  case 193:
-#line 568 "c.y"
-    { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
-    break;
-
-  case 194:
-#line 569 "c.y"
-    { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
-    break;
-
-  case 195:
 #line 570 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
-  case 196:
+  case 193:
 #line 571 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
-  case 197:
+  case 194:
 #line 572 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
-  case 198:
+  case 195:
 #line 573 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
-  case 199:
+  case 196:
 #line 574 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
-  case 200:
+  case 197:
 #line 575 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
-  case 201:
+  case 198:
 #line 576 "c.y"
     { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
+  case 199:
+#line 577 "c.y"
+    { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
+    break;
+
+  case 200:
+#line 578 "c.y"
+    { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
+    break;
+
+  case 201:
+#line 579 "c.y"
+    { (yyval.ident) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
+    break;
+
   case 214:
-#line 596 "c.y"
+#line 599 "c.y"
     {(yyval.expr) = new IdentiferNode(*(yyvsp[(1) - (1)].string)); delete (yyvsp[(1) - (1)].string); ;}
     break;
 
   case 215:
-#line 597 "c.y"
+#line 600 "c.y"
     {(yyval.expr) = (yyvsp[(1) - (1)].expr); ;}
     break;
 
   case 216:
-#line 598 "c.y"
+#line 601 "c.y"
     {(yyval.expr) = (yyvsp[(1) - (1)].expr);;}
     break;
 
   case 217:
-#line 599 "c.y"
+#line 602 "c.y"
     {(yyval.expr)=(yyvsp[(2) - (3)].expr);;}
     break;
 
   case 218:
-#line 600 "c.y"
+#line 603 "c.y"
     {;}
     break;
 
   case 219:
-#line 604 "c.y"
+#line 607 "c.y"
     {if(debug)cout<<"---- postfix_expression 1"<<endl;;}
     break;
 
   case 220:
-#line 605 "c.y"
-    { ;}
-    break;
-
-  case 221:
-#line 606 "c.y"
-    {(yyval.expr) = new FunctionCallNode(*(yyvsp[(1) - (3)].expr));;}
-    break;
-
-  case 222:
-#line 607 "c.y"
-    {(yyval.expr) = new FunctionCallNode(*(yyvsp[(1) - (4)].expr), *(yyvsp[(3) - (4)].exprvec)) ;;}
-    break;
-
-  case 223:
 #line 608 "c.y"
     { ;}
     break;
 
-  case 224:
+  case 221:
 #line 609 "c.y"
+    {(yyval.expr) = new FunctionCallNode(*(yyvsp[(1) - (3)].expr));;}
+    break;
+
+  case 222:
+#line 610 "c.y"
+    {(yyval.expr) = new FunctionCallNode(*(yyvsp[(1) - (4)].expr), *(yyvsp[(3) - (4)].exprvec)) ;;}
+    break;
+
+  case 223:
+#line 611 "c.y"
+    { ;}
+    break;
+
+  case 224:
+#line 612 "c.y"
     { ;}
     break;
 
   case 225:
-#line 610 "c.y"
+#line 613 "c.y"
     {
 		(yyval.expr) = new UnaryOperatorNode(*(yyvsp[(1) - (2)].expr), (yyvsp[(2) - (2)].token), false);
 		;}
     break;
 
   case 226:
-#line 613 "c.y"
+#line 616 "c.y"
     {
 		(yyval.expr) = new UnaryOperatorNode(*(yyvsp[(1) - (2)].expr), (yyvsp[(2) - (2)].token), false);
 		 ;}
     break;
 
   case 227:
-#line 616 "c.y"
+#line 619 "c.y"
     { ;}
     break;
 
   case 228:
-#line 617 "c.y"
+#line 620 "c.y"
     { ;}
     break;
 
   case 229:
-#line 621 "c.y"
+#line 624 "c.y"
     {cout<<"---- unary_expression 1"<<endl;;}
     break;
 
   case 230:
-#line 622 "c.y"
-    {
-		(yyval.expr) = new UnaryOperatorNode(*(yyvsp[(2) - (2)].expr), (yyvsp[(1) - (2)].token), true);
-		;}
-    break;
-
-  case 231:
 #line 625 "c.y"
     {
 		(yyval.expr) = new UnaryOperatorNode(*(yyvsp[(2) - (2)].expr), (yyvsp[(1) - (2)].token), true);
 		;}
     break;
 
-  case 232:
+  case 231:
 #line 628 "c.y"
+    {
+		(yyval.expr) = new UnaryOperatorNode(*(yyvsp[(2) - (2)].expr), (yyvsp[(1) - (2)].token), true);
+		;}
+    break;
+
+  case 232:
+#line 631 "c.y"
     {
 		if(dynamic_cast<IntNode *>((yyvsp[(2) - (2)].expr))){
 		 (yyval.expr) = new IntNode((yyvsp[(1) - (2)].token), (yyvsp[(2) - (2)].expr)) ;
@@ -2989,154 +2989,154 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 233:
-#line 640 "c.y"
+#line 643 "c.y"
     {;}
     break;
 
   case 234:
-#line 641 "c.y"
+#line 644 "c.y"
     {;}
     break;
 
   case 235:
-#line 642 "c.y"
+#line 645 "c.y"
     {;}
     break;
 
   case 237:
-#line 647 "c.y"
+#line 650 "c.y"
     {;}
     break;
 
   case 238:
-#line 651 "c.y"
+#line 654 "c.y"
     {cout<<"---- mult_expression 1"<<endl;;}
     break;
 
   case 239:
-#line 652 "c.y"
+#line 655 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 240:
-#line 653 "c.y"
+#line 656 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 241:
-#line 654 "c.y"
+#line 657 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 242:
-#line 658 "c.y"
+#line 661 "c.y"
     {;}
     break;
 
   case 243:
-#line 659 "c.y"
+#line 662 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 244:
-#line 660 "c.y"
+#line 663 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 245:
-#line 664 "c.y"
+#line 667 "c.y"
     {;}
     break;
 
   case 246:
-#line 665 "c.y"
+#line 668 "c.y"
     {;}
     break;
 
   case 247:
-#line 666 "c.y"
+#line 669 "c.y"
     {;}
     break;
 
   case 248:
-#line 670 "c.y"
+#line 673 "c.y"
     {;}
     break;
 
   case 249:
-#line 671 "c.y"
-    {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
-    break;
-
-  case 250:
-#line 672 "c.y"
-    {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
-    break;
-
-  case 251:
-#line 673 "c.y"
-    {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
-    break;
-
-  case 252:
 #line 674 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
+  case 250:
+#line 675 "c.y"
+    {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
+    break;
+
+  case 251:
+#line 676 "c.y"
+    {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
+    break;
+
+  case 252:
+#line 677 "c.y"
+    {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
+    break;
+
   case 253:
-#line 678 "c.y"
+#line 681 "c.y"
     {;}
     break;
 
   case 254:
-#line 679 "c.y"
+#line 682 "c.y"
     {(yyval.expr) = new ExprBoolNode( (yyvsp[(2) - (3)].token), (yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
 		;}
     break;
 
   case 255:
-#line 681 "c.y"
+#line 684 "c.y"
     {(yyval.expr) = new ExprBoolNode((yyvsp[(2) - (3)].token), (yyvsp[(1) - (3)].expr) , (yyvsp[(3) - (3)].expr));
 		;}
     break;
 
   case 257:
-#line 687 "c.y"
+#line 690 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 259:
-#line 692 "c.y"
+#line 695 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 261:
-#line 697 "c.y"
+#line 700 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 263:
-#line 701 "c.y"
+#line 704 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 265:
-#line 706 "c.y"
+#line 709 "c.y"
     {(yyval.expr) = new BinaryOperatorNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(2) - (3)].token), *(yyvsp[(3) - (3)].expr));;}
     break;
 
   case 267:
-#line 711 "c.y"
+#line 714 "c.y"
     {;}
     break;
 
   case 268:
-#line 715 "c.y"
+#line 718 "c.y"
     {cout<<"---- assignment_expression 1"<<endl;;}
     break;
 
   case 269:
-#line 716 "c.y"
+#line 719 "c.y"
     {
 		cout<<"---- assignment_expression 2"<<endl;
 		(yyval.expr) = new AssignmentNode(*(yyvsp[(1) - (3)].expr), (yyvsp[(3) - (3)].expr));
@@ -3145,17 +3145,17 @@ cout<<"----dec_spec 6\n";
     break;
 
   case 270:
-#line 724 "c.y"
+#line 727 "c.y"
     {;}
     break;
 
   case 271:
-#line 728 "c.y"
+#line 731 "c.y"
     {;}
     break;
 
   case 272:
-#line 729 "c.y"
+#line 732 "c.y"
     {;}
     break;
 
@@ -3375,7 +3375,7 @@ yyreturn:
 }
 
 
-#line 734 "c.y"
+#line 737 "c.y"
 
 #include <stdio.h>
 
