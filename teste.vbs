@@ -1,4 +1,4 @@
-sub main
+sub main ()
 
 dim y as integer
 dim xx as integer

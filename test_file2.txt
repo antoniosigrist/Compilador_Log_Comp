@@ -1,3 +1,5 @@
+sub main()
+
 if 2>-7 then
 x = 10'*10/1*(0+1)
 end if

@@ -732,8 +732,20 @@ class Parser:
 		nexttoken = Parser.tokens.selectNext()
 
 
-
 		if nexttoken.string != "main":
+
+			raise Exception ("Faltou main")
+
+		nexttoken = Parser.tokens.selectNext()
+
+		if nexttoken.string != "(":
+
+			raise Exception ("Faltou main")
+
+		nexttoken = Parser.tokens.selectNext()
+
+
+		if nexttoken.string != ")":
 
 			raise Exception ("Faltou main")
 
@@ -754,7 +766,7 @@ class Parser:
 			raise Exception ("Faltou sub na main")
 
 		nexttoken = Parser.tokens.selectNext()
-		
+
 
 		while nexttoken.string != "EOF":
 
@@ -898,8 +910,6 @@ class Parser:
 			if nexttoken.string == "else":
 				
 				value = "else"
-
-				print(value)
 
 				nexttoken = Parser.tokens.selectNext()
 

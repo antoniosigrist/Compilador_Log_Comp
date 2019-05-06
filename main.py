@@ -732,8 +732,20 @@ class Parser:
 		nexttoken = Parser.tokens.selectNext()
 
 
-
 		if nexttoken.string != "main":
+
+			raise Exception ("Faltou main")
+
+		nexttoken = Parser.tokens.selectNext()
+
+		if nexttoken.string != "(":
+
+			raise Exception ("Faltou main")
+
+		nexttoken = Parser.tokens.selectNext()
+
+
+		if nexttoken.string != ")":
 
 			raise Exception ("Faltou main")
 
