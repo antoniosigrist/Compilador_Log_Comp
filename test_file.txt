@@ -1,2 +1,0 @@
-3*(3+2)*2'-1/1 ' comentando o codigo
-2+2

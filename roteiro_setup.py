@@ -3,16 +3,41 @@
 import sys
 
 
+
+class Assemb:
+
+	from asm_init import asm 
+
+	def write(text,w=True):
+
+		if w == True:
+			Assemb.asm = Assemb.asm + text + "\n"
+
+	def get_asm():
+
+		return Assemb.asm
+
 class Node:
+
+	i = 0
 
 	def __init__(self,value,children):
 
 		self.value = value
 		self.children = children
+		self.id = Node.newId()
+	
 
 	def Evaluate(self,ST):
 
 		pass
+
+	@staticmethod
+	def newId():
+
+		Node.i += 4
+
+		return Node.i
 
 
 class StatementsOp(Node):
@@ -63,6 +88,10 @@ class PrintOp(Node):
 
 	def Evaluate(self,ST):
 
+		Assemb.write("PUSH EBX")
+		Assemb.write("CALL print")
+		Assemb.write("POP EBX")
+
 		print(self.children[0].Evaluate(ST)[0])
 
 
@@ -85,12 +114,21 @@ class Assignment(Node):
 
 			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
+				id_ = ST.getter_id(self.children[0])
+
+				child_with_id = (children1[0],children1[1],id_)
+
 				ST.remove(self.children[0].upper())
-				ST.setter(self.children[0], children1)
+
+				ST.setter(self.children[0], child_with_id)
+
+				Assemb.write("MOV [EBP-"+str(child_with_id[2])+"], EBX")
 
 			else:
 
-				raise Exception ("Variavel '"+str(self.children[0])+"' nao é do tipo que está sendo atribuida" )
+				raise Exception ("Variavel '"+id_+"' nao é do tipo que está sendo atribuida" )
+
+			
 
 		else:
 
@@ -104,10 +142,17 @@ class WhileOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST):
+
+		Assemb.write("LOOP_34:")
+
+		w = True
 		
 		while self.children[0].Evaluate(ST)[0] == True:
 
 			self.children[1].Evaluate(ST)
+			Assemb.write("JMP LOOP_34",w)
+			Assemb.write("EXIT_34:",w)
+			Assemb.write("")
 
 
 class IfOp(Node):
@@ -156,6 +201,16 @@ class SymbolTable:
 
 			return None
 
+	def getter_id(self,key):
+
+		if key in self.ST:
+
+			return self.ST[key][2]
+
+		else:
+
+			return None
+
 
 	def setter(self,key,value):
 
@@ -179,6 +234,7 @@ class Identifier(Node):
 		pass
 
 
+
 class BinOp(Node):
 
 	def __init__(self,value,children):
@@ -200,6 +256,11 @@ class BinOp(Node):
 
 				if self.value == "plus":
 
+					Assemb.write("POP EAX")
+					Assemb.write("ADD EAX, EBX")
+					Assemb.write("MOV EBX, EAX")
+					Assemb.write("POP EAX")
+
 					return (children0[0] + children1[0] , children0[1])
 
 				if self.value == "minus":
@@ -207,6 +268,10 @@ class BinOp(Node):
 					return (children0[0] - children1[0] , children0[1])
 
 				if self.value == "times":
+
+					Assemb.write("POP EAX")
+					Assemb.write("IMUL EBX")
+					Assemb.write("MOV EBX, EAX")
 
 					return (children0[0] * children1[0] , children0[1])
 
@@ -236,6 +301,12 @@ class BinOp(Node):
 
 				if self.value == "<":
 
+					Assemb.write("CMP EAX, EBX")
+					Assemb.write("CALL binop_jl")
+					Assemb.write("CMP EBX, False")
+					Assemb.write("JE EXIT_34")
+					Assemb.write(" ")
+
 					return (children0[0] < children1[0] , children0[1])
 
 			
@@ -252,7 +323,7 @@ class UnOp(Node):
 
 		if self.value == "plus":
 
-			return  self.children[0].Evaluate(ST)
+			return  (self.children[0].Evaluate(ST),"integer")
 
 		if self.value == "minus":
 
@@ -260,7 +331,7 @@ class UnOp(Node):
 
 		if self.value == "not":
 
-			return not self.children[0].Evaluate(ST)
+			return not (self.children[0].Evaluate(ST),"integer")
 
 class IntVal(Node):
 
@@ -270,6 +341,8 @@ class IntVal(Node):
 		self.children = children
 
 	def Evaluate(self,ST):
+
+		Assemb.write("MOV EBX, "+str(self.value))
 
 		return (self.value,"integer")
 
@@ -308,6 +381,9 @@ class VarVal(Node):
 
 	def Evaluate(self,ST):
 
+		Assemb.write("MOV EBX, [EBP-"+str(ST.getter_id(self.value.upper()))+"]")
+		Assemb.write("PUSH EBX")
+
 		return ST.getter(self.value.upper())
 
 
@@ -332,10 +408,11 @@ class VarDec(Node):
 
 	def Evaluate(self,ST):
 
-		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
+		Assemb.write("PUSH DWORD 0")
 
+		id_ = Node.newId()
 
-
+		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST),id_))
 
 
 
@@ -345,7 +422,6 @@ class Token:
 
 		self.string = string
 		self.value = value
-
 
 
 
@@ -950,15 +1026,21 @@ class Parser:
 
 		node1 = Parser.parserExpression()
 
-		comp_signal = nexttoken.string
+		if nexttoken.string in ["=",">","<"]:
 
-		nexttoken = Parser.tokens.selectNext()
+			comp_signal = nexttoken.string
 
-		node2 = Parser.parserExpression()
+			nexttoken = Parser.tokens.selectNext()
 
-		node = BinOp(comp_signal,[node1,node2])
+			node2 = Parser.parserExpression()
 
-		return node
+			node = BinOp(comp_signal,[node1,node2])
+
+			return node
+
+		else:
+
+			return node1
 
 
 	def factor():
@@ -1151,3 +1233,24 @@ ST1 = SymbolTable()
 Parser.run(string).Evaluate(ST1)
 
 print("ST = ",ST1.ST)
+
+Assemb.write("POP EBP")
+Assemb.write("MOV EAX, 1")
+Assemb.write("INT 0x80")
+
+asm_file  = open("assembly.asm", "w")
+
+asm = Assemb.get_asm()
+
+
+for assemb_instruction in asm:
+
+	asm_file.write(assemb_instruction)
+
+asm_file.close()
+
+
+
+
+
+

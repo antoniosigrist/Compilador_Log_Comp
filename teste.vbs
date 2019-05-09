@@ -1,49 +1,13 @@
-sub main ()
-
-dim y as integer
-dim xx as integer
-dim inp as boolean
-dim z as integer
-dim x as boolean
-
-xx = 99
-y = 50
-x = False
-
-while xx<105
-
-	xx = xx+1
-	Y = y - xx
-
-' linha de baixo pede input
-
-wend
-
-
-if 2 < 4 then
-
-	print xx
-	inp = True
-
-else
-
-	inp = False
-
-end if
-
-print inp ' espera false
-
-end sub
-
-
-
-
-
-
-
-
-
-
-
-
-
+Sub Main ()
+Dim i as Integer 
+Dim n as Integer 
+Dim f as Integer 
+n=5
+i=2
+f=1
+While i < n + 1
+f=f*i
+i=i+1 
+Wend
+  Print f
+End Sub
