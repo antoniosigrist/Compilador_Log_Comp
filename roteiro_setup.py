@@ -161,7 +161,7 @@ class WhileOp(Node):
 		node_id = Node.newNodeId()
 
 		Assemb.write("",w)
-		Assemb.write("LOOP_"+str(node_id)+":")
+		Assemb.write("LOOP_"+str(node_id)+" :")
 
 		w = True
 		
@@ -173,7 +173,7 @@ class WhileOp(Node):
 
 		w = True
 		Assemb.write("JMP LOOP_"+str(node_id),w)
-		Assemb.write("EXIT_"+str(node_id)+":",w)
+		Assemb.write("EXIT_"+str(node_id)+" :",w)
 		Assemb.write("",w)
 
 
@@ -189,7 +189,7 @@ class IfOp(Node):
 		node_id = Node.newNodeId()
 
 		Assemb.write("",w)
-		Assemb.write("LOOP_"+str(node_id)+":")
+		Assemb.write("LOOP_"+str(node_id)+" :")
 
 		if self.value == "if":
 
@@ -213,7 +213,7 @@ class IfOp(Node):
 				self.children[2].Evaluate(ST,w)
 
 		Assemb.write("JMP LOOP_"+str(node_id),w)
-		Assemb.write("EXIT_"+str(node_id)+":",w)
+		Assemb.write("EXIT_"+str(node_id)+" :",w)
 		Assemb.write("",w)
 
 
