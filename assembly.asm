@@ -1,3 +1,21 @@
+; constantes 
+SYS_EXIT equ 1 
+SYS_READ equ 3 
+SYS_WRITE equ 4 
+STDIN equ 0 
+STDOUT equ 1 
+True equ 1
+False equ 0
+
+segment .data
+
+segment .bss ; variaveis
+  res RESB 1
+
+
+section .text 
+  global _start
+
 print:  ; subrotina print
 
   PUSH EBP ; guarda o base pointer
@@ -53,35 +71,41 @@ binop_jl:
 binop_false:
   MOV EBX, False  
   JMP binop_exit
+
 binop_true:
   MOV EBX, True
 binop_exit:
   RET
 
+
 _start :
 
-PUSH EBP 
-MOV EBP, ESP 
-
-PUSH DWORD 0
+PUSH EBP ; guarda o base pointer
+MOV EBP, ESP ; estabelece um novo base pointerPUSH DWORD 0
 PUSH DWORD 0
 PUSH DWORD 0
 MOV EBX, 5
 MOV [EBP-8], EBX
+
 MOV EBX, 2
 MOV [EBP-4], EBX
+
 MOV EBX, 1
 MOV [EBP-12], EBX
+
 
 LOOP_1:
 MOV EBX, [EBP-4]
 PUSH EBX
+
 MOV EBX, [EBP-8]
 PUSH EBX
+
 MOV EBX, 1
 POP EAX
 ADD EAX, EBX
 MOV EBX, EAX
+
 POP EAX
 CMP EAX, EBX
 CALL binop_jl
@@ -90,25 +114,32 @@ JE EXIT_1
 
 MOV EBX, [EBP-12]
 PUSH EBX
+
 MOV EBX, [EBP-4]
 PUSH EBX
+
 POP EAX
 IMUL EBX
 MOV EBX, EAX
 MOV [EBP-12], EBX
+
 MOV EBX, [EBP-4]
 PUSH EBX
+
 MOV EBX, 1
 POP EAX
 ADD EAX, EBX
 MOV EBX, EAX
+
 POP EAX
 MOV [EBP-4], EBX
+
 JMP LOOP_1
 EXIT_1:
 
 MOV EBX, [EBP-12]
 PUSH EBX
+
 CALL print
 POP EBX
  

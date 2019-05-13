@@ -1,5 +1,24 @@
 #encoding=utf-8
-asm = """print:  ; subrotina print
+
+asm = """; constantes 
+SYS_EXIT equ 1 
+SYS_READ equ 3 
+SYS_WRITE equ 4 
+STDIN equ 0 
+STDOUT equ 1 
+True equ 1
+False equ 0
+
+segment .data
+
+segment .bss ; variaveis
+  res RESB 1
+
+
+section .text 
+  global _start
+
+print:  ; subrotina print
 
   PUSH EBP ; guarda o base pointer
   MOV EBP, ESP ; estabelece um novo base pointer
@@ -54,14 +73,15 @@ binop_jl:
 binop_false:
   MOV EBX, False  
   JMP binop_exit
+
 binop_true:
   MOV EBX, True
 binop_exit:
   RET
 
+
 _start :
 
-PUSH EBP 
-MOV EBP, ESP 
+PUSH EBP ; guarda o base pointer
+MOV EBP, ESP ; estabelece um novo base pointer"""
 
-"""

@@ -137,6 +137,7 @@ class Assignment(Node):
 				ST.setter(self.children[0], child_with_id)
 
 				Assemb.write("MOV [EBP-"+str(child_with_id[2])+"], EBX",w)
+				Assemb.write("",w)
 
 			else:
 
@@ -292,6 +293,7 @@ class BinOp(Node):
 					Assemb.write("POP EAX",w)
 					Assemb.write("ADD EAX, EBX",w)
 					Assemb.write("MOV EBX, EAX",w)
+					Assemb.write("",w)
 					Assemb.write("POP EAX",w)
 
 					return (children0[0] + children1[0] , children0[1])
@@ -437,6 +439,7 @@ class VarVal(Node):
 
 		Assemb.write("MOV EBX, [EBP-"+str(ST.getter_id(self.value.upper()))+"]",w)
 		Assemb.write("PUSH EBX",w)
+		Assemb.write("",w)
 
 		return ST.getter(self.value.upper())
 
