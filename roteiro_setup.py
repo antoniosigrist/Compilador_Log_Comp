@@ -315,6 +315,10 @@ class BinOp(Node):
 
 				if self.value == "division":
 
+					Assemb.write("POP EAX",w)
+					Assemb.write("IDIV EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
+
 					return (children0[0] // children1[0] , children0[1])
 
 				if self.value == "=":
@@ -335,6 +339,12 @@ class BinOp(Node):
 
 				if self.value == ">":
 
+					Assemb.write("CMP EAX, EBX",w)
+					Assemb.write("CALL binop_jg",w)
+					Assemb.write("CMP EBX, False",w)
+					Assemb.write("JE EXIT_"+str(node_id),w)
+					Assemb.write("",w)
+
 					return (children0[0] > children1[0] , children0[1])
 
 				if self.value == "<":
@@ -345,7 +355,6 @@ class BinOp(Node):
 					Assemb.write("JE EXIT_"+str(node_id),w)
 					Assemb.write("",w)
 
-					
 
 					return (children0[0] < children1[0] , children0[1])
 
@@ -399,6 +408,8 @@ class BoolVal(Node):
 		self.children = children
 
 	def Evaluate(self,ST,w=True):
+
+		Assemb.write("MOV EBX, "+str(self.value),w)
 
 		return (self.value,"boolean")
 
