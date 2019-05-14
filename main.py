@@ -325,15 +325,25 @@ class BinOp(Node):
 
 				if self.value == "=":
 
-					return (children0[0] == children1[0] , children0[1])
+					Assemb.write("CMP EAX, EBX",w)
+					Assemb.write("CALL binop_je",w)
+
+					return (children0[0] == children1[0] , "boolean")
 
 				if self.value == "and":
 
-					return (children0[0] and children1[0] , children0[1])
+					Assemb.write("AND EAX, EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
+
+
+					return (children0[0] and children1[0] , "boolean")
 
 				if self.value == "or":
 
-					return (children0[0] or children1[0] , children0[1])
+					Assemb.write("OR EAX, EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
+
+					return (children0[0] or children1[0] , "boolean")
 
 				if children0[1] == "boolean" or children1[1] == "boolean":
 
@@ -347,7 +357,7 @@ class BinOp(Node):
 					Assemb.write("JE EXIT_"+str(node_id),w)
 					Assemb.write("",w)
 
-					return (children0[0] > children1[0] , children0[1])
+					return (children0[0] > children1[0] , "boolean")
 
 				if self.value == "<":
 
@@ -358,7 +368,7 @@ class BinOp(Node):
 					Assemb.write("",w)
 
 
-					return (children0[0] < children1[0] , children0[1])
+					return (children0[0] < children1[0] , "boolean")
 
 			
 			
@@ -382,7 +392,7 @@ class UnOp(Node):
 
 		if self.value == "not":
 
-			return not (self.children[0].Evaluate(ST,w),"integer")
+			return (not self.children[0].Evaluate(ST,w),"integer")
 
 
 
@@ -535,9 +545,6 @@ class Tokenizer:
 
 						i += 1	
 
-					
-					#self.position += 1  ### REVER ISSO AQUI
-
 			
 
 			if str(self.origin[i]).isdigit():
@@ -565,15 +572,16 @@ class Tokenizer:
 
 				variable = ""
 
-				while self.origin[i].isalpha():
+				while self.origin[i].isalpha() or self.origin[i] == "_":
 
 					variable += str(self.origin[i])
 
 					i += 1
 
-					if i > len(self.origin)-1:
+					if i > len(self.origin)-1 or str(self.origin[i]) == "(" or str(self.origin[i]) == ")":
 
 						break
+
 
 				variable = variable.upper()
 
@@ -661,7 +669,7 @@ class Tokenizer:
 
 					self.actual.string = "boolean"
 					self.actual.value = True
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -685,7 +693,7 @@ class Tokenizer:
 
 					self.actual.string = "boolean"
 					self.actual.value = False
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -693,7 +701,7 @@ class Tokenizer:
 
 					self.actual.string = "not"
 					self.actual.value = "not"
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -709,7 +717,7 @@ class Tokenizer:
 
 					self.actual.string = "sub"
 					self.actual.value = "sub"
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -717,7 +725,7 @@ class Tokenizer:
 
 					self.actual.string = "main"
 					self.actual.value = "main"
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -957,8 +965,6 @@ class Parser:
 
 			else:
 
-				print(nexttoken.value)
-
 				raise Exception ("Espera-se uma atribuicao")
 
 		if nexttoken.string == "dim":
@@ -1026,19 +1032,19 @@ class Parser:
 
 			node_rel = Parser.RelExpression()
 
-
 			if nexttoken.string != "then":
 
 				raise Exception ("Espara-se um then")
 
 			nexttoken = Parser.tokens.selectNext()
 
-			node_true = Parser.Statements()
+			while nexttoken.string != "else" and nexttoken.string != "end":
 
-			value = "if"
+				node_true = Parser.Statements()
+
+				value = "if"
 			
-			node_else = None
-
+				node_else = None
 
 			if nexttoken.string == "else":
 				
@@ -1046,7 +1052,9 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				node_else = Parser.Statements()
+				while nexttoken.string != "end":
+
+					node_else = Parser.Statements()
 
 
 			if nexttoken.string != "end":
@@ -1073,8 +1081,6 @@ class Parser:
 
 		else:
 
-			print(nexttoken.string)
-
 			raise Exception ("Algo deu ruim")
 
 	def RelExpression():
@@ -1083,7 +1089,7 @@ class Parser:
 
 		node1 = Parser.parserExpression()
 
-		if nexttoken.string in ["=",">","<"]:
+		while nexttoken.string in ["=",">","<"]:
 
 			comp_signal = nexttoken.string
 
@@ -1092,6 +1098,7 @@ class Parser:
 			node2 = Parser.parserExpression()
 
 			node = BinOp(comp_signal,[node1,node2])
+
 
 			return node
 
@@ -1103,6 +1110,10 @@ class Parser:
 	def factor():
 
 		nexttoken = Parser.tokens.actual
+
+		while nexttoken.string == "\n":
+			
+			nexttoken = Parser.tokens.selectNext()
 
 		soma = 0
 
@@ -1135,7 +1146,7 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-			soma = Parser.parserExpression()
+			soma = Parser.RelExpression()
 
 			if nexttoken.string != ")":
 
@@ -1178,8 +1189,7 @@ class Parser:
 
 		else:
 
-			print (nexttoken.value)
-			raise Exception ("Invalid Sintax")
+			raise Exception ("Invalid Token Factor")
 
 	
 	def term():
@@ -1189,7 +1199,8 @@ class Parser:
 		node = Parser.factor()
 
 
-		while nexttoken.string in ["times", "division"]:
+		while nexttoken.string in ["times", "division","and"]:
+
 
 			if nexttoken.string == "times":
 
@@ -1217,7 +1228,6 @@ class Parser:
 
 				node = BinOp("and",[node,soma])
 						
-
 		return node
 
 
@@ -1231,7 +1241,7 @@ class Parser:
 		node = Parser.term()
 		
 
-		while nexttoken.string in ["plus", "minus"]:
+		while nexttoken.string in ["plus","minus","or"]:
 
 
 			if nexttoken.string == "plus":
@@ -1253,7 +1263,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				soma =  Parser.factor()
+				soma = Parser.factor()
 				node = BinOp("or",[node,soma])
 						
 
@@ -1306,9 +1316,3 @@ for assemb_instruction in asm:
 	asm_file.write(assemb_instruction)
 
 asm_file.close()
-
-
-
-
-
-
