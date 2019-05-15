@@ -105,6 +105,7 @@ class PrintOp(Node):
 
 		print(self.children[0].Evaluate(ST,w)[0])
 
+		Assemb.write("PUSH EBX",w)
 		Assemb.write("CALL print",w)
 		Assemb.write("POP EBX",w)
 
@@ -279,8 +280,10 @@ class BinOp(Node):
 			node_id = Node.getNodeId()
 			
 			children0 = self.children[0].Evaluate(ST,w)
+			Assemb.write("PUSH EBX",w)
 
 			children1 = self.children[1].Evaluate(ST,w)
+			Assemb.write("POP EAX",w)
 
 			if children1[1] != children0[1]:
 
@@ -290,26 +293,21 @@ class BinOp(Node):
 
 				if self.value == "plus":
 
-					Assemb.write("POP EAX",w)
 					Assemb.write("ADD EAX, EBX",w)
 					Assemb.write("MOV EBX, EAX",w)
 					Assemb.write("",w)
-					Assemb.write("POP EAX",w)
 
 					return (children0[0] + children1[0] , children0[1])
 
 				if self.value == "minus":
 
-					Assemb.write("POP EAX",w)
 					Assemb.write("SUB EAX, EBX",w)
 					Assemb.write("MOV EBX, EAX",w)
-					Assemb.write("POP EAX",w)
 
 					return (children0[0] - children1[0] , children0[1])
 
 				if self.value == "times":
 
-					Assemb.write("POP EAX",w)
 					Assemb.write("IMUL EBX",w)
 					Assemb.write("MOV EBX, EAX",w)
 
@@ -317,7 +315,6 @@ class BinOp(Node):
 
 				if self.value == "division":
 
-					Assemb.write("POP EAX",w)
 					Assemb.write("IDIV EBX",w)
 					Assemb.write("MOV EBX, EAX",w)
 
@@ -327,6 +324,8 @@ class BinOp(Node):
 
 					Assemb.write("CMP EAX, EBX",w)
 					Assemb.write("CALL binop_je",w)
+					Assemb.write("CMP EBX, False",w)
+					Assemb.write("JE EXIT_"+str(node_id),w)
 
 					return (children0[0] == children1[0] , "boolean")
 
@@ -388,9 +387,13 @@ class UnOp(Node):
 
 		if self.value == "minus":
 
+			Assemb.write("NEG EBX",w)
+
 			return (-self.children[0].Evaluate(ST,w)[0],"integer")
 
 		if self.value == "not":
+
+			Assemb.write("NOT EBX",w)
 
 			return (not self.children[0].Evaluate(ST,w),"integer")
 
@@ -448,7 +451,6 @@ class VarVal(Node):
 	def Evaluate(self,ST,w=True):
 
 		Assemb.write("MOV EBX, [EBP-"+str(ST.getter_id(self.value.upper()))+"]",w)
-		Assemb.write("PUSH EBX",w)
 		Assemb.write("",w)
 
 		return ST.getter(self.value.upper())

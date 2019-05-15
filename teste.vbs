@@ -1,19 +1,13 @@
-Sub main()
-    Dim teste_bool as boolean
-    Dim teste_int as integer
-    teste_bool = True
-    teste_int = 10
-
-    if teste_bool then
-        print teste_int + 10
-    end if
-
-    while (teste_int > 0) and teste_bool = True
-        print teste_int
-        teste_int = teste_int - 1
-    wend
-
-    teste_int = input
-    print teste_int
-
+Sub Main()
+Dim i as Integer 
+Dim n as Integer 
+Dim f as Integer 
+n=5
+i=2
+f=1
+While i < n + 1
+f=f*i
+i=i+1 
+Wend
+  Print f
 End Sub
