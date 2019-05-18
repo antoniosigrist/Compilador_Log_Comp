@@ -4,18 +4,55 @@ import sys
 
 
 
+class Assemb:
+
+	from asm_init import asm 
+
+	def write(text,w=True):
+
+		if w == True:
+			Assemb.asm = Assemb.asm + text + "\n"
+
+	def get_asm():
+
+		return Assemb.asm
+
 class Node:
 
+	i = 0
+	node_i = 0
 
 	def __init__(self,value,children):
 
 		self.value = value
 		self.children = children
+		self.id = Node.newId()
 	
 
 	def Evaluate(self,ST,w=True):
 
 		pass
+
+	@staticmethod
+	def newId():
+
+		Node.i += 4
+
+		return Node.i
+
+	@staticmethod
+	def newNodeId():
+
+		Node.node_i += 1
+
+		return Node.node_i
+
+	@staticmethod
+	def getNodeId():
+
+		return Node.node_i
+
+
 
 
 class StatementsOp(Node):
@@ -29,124 +66,9 @@ class StatementsOp(Node):
 
 		for child in self.children:
 
-			child.Evaluate(ST)
+			child.Evaluate(ST,w)
 
 			#print(ST.ST)
-
-
-
-class Func_CallerOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST,w=True):
-
-		main_pos = 0
-
-		for node_name in ST.ST:
-
-			if node_name == self.value.upper():
-
-				pos = 0
-				
-				for i in ST.ST[node_name][0]:
-					
-					if pos != 0:
-
-						i.Evaluate(ST)
-						
-					pos = 1
-
-				break
-
-
-class FuncCallerOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST,w=True):
-
-		main_pos = 0
-
-		for node_name in ST.ST:
-
-			if node_name == self.value.upper():
-
-				break
-
-			main_pos+=1
-
-		main_func_pos = 0
-
-		for child in self.children:
-
-
-			if main_func_pos == main_pos:
-
-				child.Evaluate(ST)
-
-			main_func_pos += 1
-
-
-class ProgramOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST,w=True):
-
-		for child in self.children:
-
-			print(child)
-
-			child.children[0].Evaluate(ST)
-
-		FuncCallerOp("MAIN",self.children).Evaluate(ST)
-
-	
-class SubDecOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST,w=True):
-
-		first_element = 0
-
-		for child in self.children:
-
-			if first_element == 0:
-
-				first_element+=1
-
-				pass
-
-			else:
-
-				child.Evaluate(ST)
-
-
-class FuncDecOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST,w=True):
-
-		pass
-
 
 class TypeOp(Node):
 
@@ -165,14 +87,6 @@ class TypeOp(Node):
 
 			return "boolean"
 
-		elif self.children[0] == "sub":
-
-			return "sub"
-
-		elif self.children[0] == "function":
-
-			return "function"
-
 		else:
 
 			raise Exception ("Espera-se tipos integer or boolean")
@@ -189,7 +103,11 @@ class PrintOp(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		print(self.children[0].Evaluate(ST)[0])
+		print(self.children[0].Evaluate(ST,w)[0])
+
+		Assemb.write("PUSH EBX",w)
+		Assemb.write("CALL print",w)
+		Assemb.write("POP EBX",w)
 
 
 
@@ -207,16 +125,20 @@ class Assignment(Node):
 
 		if var != None:
 
-			children1 = self.children[1].Evaluate(ST)
+			children1 = self.children[1].Evaluate(ST,w)
 
 			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
-				child_with_id = (children1[0],children1[1])
+				id_ = ST.getter_id(self.children[0])
+
+				child_with_id = (children1[0],children1[1],id_)
 
 				ST.remove(self.children[0].upper())
 
 				ST.setter(self.children[0], child_with_id)
 
+				Assemb.write("MOV [EBP-"+str(child_with_id[2])+"], EBX",w)
+				Assemb.write("",w)
 
 			else:
 
@@ -237,10 +159,23 @@ class WhileOp(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		
-		while self.children[0].Evaluate(ST)[0] == True:
+		node_id = Node.newNodeId()
 
-			self.children[1].Evaluate(ST)
+		Assemb.write("",w)
+		Assemb.write("LOOP_"+str(node_id)+" :")
+
+		w = True
+		
+		while self.children[0].Evaluate(ST,w)[0] == True:
+
+			self.children[1].Evaluate(ST,w)
+
+			w = False
+
+		w = True
+		Assemb.write("JMP LOOP_"+str(node_id),w)
+		Assemb.write("EXIT_"+str(node_id)+" :",w)
+		Assemb.write("",w)
 
 
 class IfOp(Node):
@@ -252,12 +187,16 @@ class IfOp(Node):
 
 	def Evaluate(self,ST,w=True):
 
+		node_id = Node.newNodeId()
+
+		Assemb.write("",w)
+		Assemb.write("LOOP_"+str(node_id)+" :")
 
 		if self.value == "if":
 
-			if self.children[0].Evaluate(ST)[0] == True:
+			if self.children[0].Evaluate(ST,w)[0] == True:
 
-				self.children[1].Evaluate(ST)
+				self.children[1].Evaluate(ST,w)
 
 			else:
 
@@ -266,13 +205,17 @@ class IfOp(Node):
 
 		elif self.value == "else":
 			
-			if self.children[0].Evaluate(ST)[0] == True:
+			if self.children[0].Evaluate(ST,w)[0] == True:
 
-				self.children[1].Evaluate(ST)
+				self.children[1].Evaluate(ST,w)
 
 			else:
 
-				self.children[2].Evaluate(ST)
+				self.children[2].Evaluate(ST,w)
+
+		Assemb.write("JMP LOOP_"+str(node_id),w)
+		Assemb.write("EXIT_"+str(node_id)+" :",w)
+		Assemb.write("",w)
 
 
 class SymbolTable:
@@ -291,11 +234,20 @@ class SymbolTable:
 
 			return None
 
+	def getter_id(self,key):
+
+		if key in self.ST:
+
+			return self.ST[key][2]
+
+		else:
+
+			return None
+
 
 	def setter(self,key,value):
 
 		self.ST.update({key: value})
-
 
 	def remove(self,key):
 
@@ -324,10 +276,14 @@ class BinOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST,w=True):
-			
-			children0 = self.children[0].Evaluate(ST)
 
-			children1 = self.children[1].Evaluate(ST)
+			node_id = Node.getNodeId()
+			
+			children0 = self.children[0].Evaluate(ST,w)
+			Assemb.write("PUSH EBX",w)
+
+			children1 = self.children[1].Evaluate(ST,w)
+			Assemb.write("POP EAX",w)
 
 			if children1[1] != children0[1]:
 
@@ -337,29 +293,54 @@ class BinOp(Node):
 
 				if self.value == "plus":
 
+					Assemb.write("ADD EAX, EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
+					Assemb.write("",w)
+
 					return (children0[0] + children1[0] , children0[1])
 
 				if self.value == "minus":
+
+					Assemb.write("SUB EAX, EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
 
 					return (children0[0] - children1[0] , children0[1])
 
 				if self.value == "times":
 
+					Assemb.write("IMUL EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
+
 					return (children0[0] * children1[0] , children0[1])
 
 				if self.value == "division":
+
+					Assemb.write("IDIV EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
 
 					return (children0[0] // children1[0] , children0[1])
 
 				if self.value == "=":
 
+					Assemb.write("CMP EAX, EBX",w)
+					Assemb.write("CALL binop_je",w)
+					Assemb.write("CMP EBX, False",w)
+					Assemb.write("JE EXIT_"+str(node_id),w)
+
 					return (children0[0] == children1[0] , "boolean")
 
 				if self.value == "and":
 
+					Assemb.write("AND EAX, EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
+
+
 					return (children0[0] and children1[0] , "boolean")
 
 				if self.value == "or":
+
+					Assemb.write("OR EAX, EBX",w)
+					Assemb.write("MOV EBX, EAX",w)
 
 					return (children0[0] or children1[0] , "boolean")
 
@@ -369,9 +350,22 @@ class BinOp(Node):
 
 				if self.value == ">":
 
+					Assemb.write("CMP EAX, EBX",w)
+					Assemb.write("CALL binop_jg",w)
+					Assemb.write("CMP EBX, False",w)
+					Assemb.write("JE EXIT_"+str(node_id),w)
+					Assemb.write("",w)
+
 					return (children0[0] > children1[0] , "boolean")
 
 				if self.value == "<":
+
+					Assemb.write("CMP EAX, EBX",w)
+					Assemb.write("CALL binop_jl",w)
+					Assemb.write("CMP EBX, False",w)
+					Assemb.write("JE EXIT_"+str(node_id),w)
+					Assemb.write("",w)
+
 
 					return (children0[0] < children1[0] , "boolean")
 
@@ -389,15 +383,19 @@ class UnOp(Node):
 
 		if self.value == "plus":
 
-			return  (self.children[0].Evaluate(ST),"integer")
+			return  (self.children[0].Evaluate(ST,w),"integer")
 
 		if self.value == "minus":
 
-			return (-self.children[0].Evaluate(ST)[0],"integer")
+			Assemb.write("NEG EBX",w)
+
+			return (-self.children[0].Evaluate(ST,w)[0],"integer")
 
 		if self.value == "not":
 
-			return (not self.children[0].Evaluate(ST),"integer")
+			Assemb.write("NOT EBX",w)
+
+			return (not self.children[0].Evaluate(ST,w),"integer")
 
 
 
@@ -411,6 +409,8 @@ class IntVal(Node):
 
 	def Evaluate(self,ST,w=True):
 
+		Assemb.write("MOV EBX, "+str(self.value),w)
+
 		return (self.value,"integer")
 
 
@@ -423,6 +423,8 @@ class BoolVal(Node):
 		self.children = children
 
 	def Evaluate(self,ST,w=True):
+
+		Assemb.write("MOV EBX, "+str(self.value),w)
 
 		return (self.value,"boolean")
 
@@ -448,6 +450,9 @@ class VarVal(Node):
 
 	def Evaluate(self,ST,w=True):
 
+		Assemb.write("MOV EBX, [EBP-"+str(ST.getter_id(self.value.upper()))+"]",w)
+		Assemb.write("",w)
+
 		return ST.getter(self.value.upper())
 
 
@@ -472,7 +477,11 @@ class VarDec(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST)))
+		Assemb.write("PUSH DWORD 0",w)
+
+		id_ = Node.newId()
+
+		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST,w),id_))
 
 
 
@@ -594,14 +603,6 @@ class Tokenizer:
 
 					return self.actual
 
-				elif variable == "CALL":
-
-					self.actual.string = "call"
-					self.actual.value = "call"
-					self.position = i
-
-					return self.actual
-
 				elif variable == "END":
 
 					self.actual.string = "end"
@@ -666,14 +667,6 @@ class Tokenizer:
 
 					return self.actual
 
-				elif variable == "FUNCTION":
-
-					self.actual.string = "function"
-					self.actual.value = "function"
-					self.position = i+1
-
-					return self.actual
-
 				elif variable == "TRUE":
 
 					self.actual.string = "boolean"
@@ -686,7 +679,7 @@ class Tokenizer:
 
 					self.actual.string = "boolean"
 					self.actual.value = "boolean"
-					self.position = i
+					self.position = i+1
 
 					return self.actual
 
@@ -694,7 +687,7 @@ class Tokenizer:
 
 					self.actual.string = "integer"
 					self.actual.value = "integer"
-					self.position = i
+					self.position = i+1
 
 					return self.actual
 
@@ -824,14 +817,6 @@ class Tokenizer:
 
 				return self.actual
 
-			elif self.origin[i] == ",":
-
-				self.actual.string = ","
-				self.actual.value = ","
-				self.position = i+1
-
-				return self.actual
-
 			elif self.origin[i] == ">":
 
 				self.actual.string = ">"
@@ -878,223 +863,60 @@ class Tokenizer:
 
 class Parser:
 
-	def Program():
+	def Main():
 
 		nexttoken = Parser.tokens.actual
 
-		children = []
 
-		while nexttoken.string in ["sub","function"]:
+		if nexttoken.string != "sub":
 
-
-			if nexttoken.string == "sub":
-
-				node = Parser.SubDec()
-
-			elif nexttoken.string == "function":
-
-				node = Parser.FuncDec()
-
-
-			children.append(node)
-
-		program = ProgramOp("main",children)
-
-		return program
-
-
-	def SubDec():
-
-		nexttoken = Parser.tokens.actual
-
-		children = []
+			raise Exception ("Faltou sub")
 
 		nexttoken = Parser.tokens.selectNext()
 
 
-		while nexttoken.string == "\n":
+		if nexttoken.string != "main":
 
-			nexttoken = Parser.tokens.selectNext()
-
-		identifier_1 = nexttoken.value.upper()
-
-		children.append(None)
-
-		nexttoken = Parser.tokens.selectNext()
-	
-
-		while nexttoken.string == "\n":
-
-			nexttoken = Parser.tokens.selectNext()
-
-
-		if nexttoken.string != "(":
-
-			raise Exception ("Faltou abrir ( ...")
-
-		nexttoken = Parser.tokens.selectNext()
-
-
-		while nexttoken.value != ")":
-
-			identifier = nexttoken.value.upper()
-
-			nexttoken = Parser.tokens.selectNext()
-
-			if nexttoken.string != "as":
-
-				raise Exception ("Faltou as nos argumentos da funcao sub")
-
-			nexttoken = Parser.tokens.selectNext()
-
-			children.append(VarDec("sub", [identifier , children , TypeOp("sub",[nexttoken.value])]))
-
-			nexttoken = Parser.tokens.selectNext()
-
-
-			if nexttoken.string in [")",","]:
-
-				if nexttoken.string == ",":
-
-					nexttoken = Parser.tokens.selectNext()
-
-				else:
-
-					break
-
-			else:
-
-				raise Exception("Espera-se que ou tenha , ou )")
-
-
-		nexttoken = Parser.tokens.selectNext()
-
-		while nexttoken.string == "\n":
-
-			nexttoken = Parser.tokens.selectNext()
-
-		if nexttoken.string == "end":
-
-			nexttoken = Parser.tokens.selectNext()
-
-			if nexttoken.string != "sub":
-
-				raise Exception ("Faltou fechar subbb")
-
-			else:
-
-				while nexttoken.string == "\n":
-
-					nexttoken = Parser.tokens.selectNext()
-
-		else:
-
-			stmt = Parser.Statements()
-
-			while nexttoken.string == "\n":
-
-				nexttoken = Parser.tokens.selectNext()
-
-			children.append(stmt)
-
-			if nexttoken.string == "end":
-
-				nexttoken = Parser.tokens.selectNext()
-
-
-				if nexttoken.string != "sub":
-
-					raise Exception ("Faltou fechar sub")
-
-				else:
-
-					nexttoken = Parser.tokens.selectNext()
-
-					while nexttoken.string == "\n":
-
-						nexttoken = Parser.tokens.selectNext()
-
-		children[0] = (VarDec("var", [identifier_1 , children , TypeOp("sub",["sub"])]))
-
-		return SubDecOp("sub",children)
-
-
-	def FuncDec():
-
-		nexttoken = Parser.tokens.actual
-
-		children = []
-
-		nexttoken = Parser.tokens.selectNext()
-
-		identifier_f = nexttoken.value
+			raise Exception ("Faltou main")
 
 		nexttoken = Parser.tokens.selectNext()
 
 		if nexttoken.string != "(":
 
-			raise Exception ("Faltou abrir ( ...")
+			raise Exception ("Faltou main")
 
 		nexttoken = Parser.tokens.selectNext()
 
-		while nexttoken.string not in [")"]:
 
-			identifier = nexttoken.value
+		if nexttoken.string != ")":
 
-			nexttoken = Parser.tokens.selectNext()
-
-			if nexttoken.string != "as":
-
-				raise Exception ("Faltou as nos argumentos da funcao sub")
-
-			nexttoken = Parser.tokens.selectNext()
-
-			children.append(VarDec("var", [identifier , 0 , TypeOp("var",[nexttoken.value])]))
-
-			nexttoken = Parser.tokens.selectNext()
-
-			if nexttoken.string in [")",","]:
-
-				if nexttoken.string == ",":
-
-					nexttoken = Parser.tokens.selectNext()
-
-				else:
-
-					pass
-
-			else:
-
-				raise Exception("Espera-se que ou tenha , ou )")
+			raise Exception ("Faltou main")
 
 		nexttoken = Parser.tokens.selectNext()
 
-		if nexttoken.string != "as":
 
-				raise Exception ("Faltou declarar tipo da funct com as")
+		main_return = Parser.Statements()
+
+
+		if nexttoken.string != "end":
+
+			raise Exception ("Faltou end na main")
 
 		nexttoken = Parser.tokens.selectNext()
 
-		children.append(VarDec("var", [identifier_f , 0 , TypeOp("function",[nexttoken.value])]))
+		if nexttoken.string != "sub":
+
+			raise Exception ("Faltou sub na main")
 
 		nexttoken = Parser.tokens.selectNext()
 
-		if nexttoken.string == "end":
+
+		while nexttoken.string != "EOF":
 
 			nexttoken = Parser.tokens.selectNext()
 
-			if nexttoken.string != "function":
 
-				raise Exception ("Faltou fechar sub")
-
-		else:
-
-			stmt = Parser.Statement()
-
-			children.append(stmt)
-
-
-		return FuncDecOp("sub",children)
+		return main_return
 
 
 	def Statements():
@@ -1166,45 +988,6 @@ class Parser:
 			nexttoken = Parser.tokens.selectNext() 
 
 			return node
-
-		elif nexttoken.string == "call":
-
-			nexttoken = Parser.tokens.selectNext() 
-
-			identifier = nexttoken.value
-
-			nexttoken = Parser.tokens.selectNext() 
-
-			if nexttoken.string != "(":
-
-				raise Exception ("Espara-se ( para parametros da funcao")
-
-			nexttoken = Parser.tokens.selectNext()
-
-			children = []
-
-			while nexttoken.string != ")":
-
-				node = Parser.RelExpression()
-
-				if nexttoken.string in [")",","]:
-
-					if nexttoken.string == ",":
-
-						nexttoken = Parser.tokens.selectNext()
-
-					else:
-
-						nexttoken = Parser.tokens.selectNext()
-						break
-
-				else:
-
-					raise Exception("Espera-se que ou tenha , ou )")
-
-			nexttoken = Parser.tokens.selectNext()
-
-			return Func_CallerOp(identifier,children)
 
 		elif nexttoken.string == "print":
 
@@ -1300,8 +1083,6 @@ class Parser:
 
 		else:
 
-			print(nexttoken.value)
-
 			raise Exception ("Algo deu ruim")
 
 	def RelExpression():
@@ -1319,6 +1100,7 @@ class Parser:
 			node2 = Parser.parserExpression()
 
 			node = BinOp(comp_signal,[node1,node2])
+
 
 			return node
 
@@ -1356,39 +1138,11 @@ class Parser:
 
 		elif nexttoken.string == "identifier":
 
-			identifier = nexttoken.value
+			node = VarVal(Parser.tokens.actual.value,[])
 
 			nexttoken = Parser.tokens.selectNext()
 
-			children = []
-
-			if nexttoken.string == "(":
-
-				while nexttoken.string != ")":
-
-					node = Parser.RelExpression()
-
-					children.append(node)
-
-					if nexttoken.string == ",":
-
-						nexttoken = nexttoken.Parser.selectNext()
-
-					elif nexttoken.string == ")":
-
-						break
-
-				### ENTENDER ESSA PARTE DO CODIGO
-
-				return node
-
-
-
-			else:
-
-				node = VarVal(identifier,[])
-
-				return node
+			return node
 
 		elif nexttoken.string == "(":
 
@@ -1524,7 +1278,7 @@ class Parser:
 		Parser.tokens = Tokenizer(code)
 		Parser.tokens.selectNext()
 
-		res = Parser.Program()
+		res = Parser.Main()
 
 		if Parser.tokens.actual.string == "EOF":
 
@@ -1532,7 +1286,7 @@ class Parser:
 
 		else:
 
-			print (Parser.tokens.actual.value)
+			print (Parser.tokens.actual.string)
 
 			raise Exception("Parser Error: EOF")
 
@@ -1549,6 +1303,18 @@ Parser.run(string).Evaluate(ST1)
 
 print("ST = ",ST1.ST)
 
+Assemb.write(" ")
+Assemb.write("POP EBP")
+Assemb.write("MOV EAX, 1")
+Assemb.write("INT 0x80")
+
+asm_file  = open("assembly.asm", "w")
+
+asm = Assemb.get_asm()
 
 
+for assemb_instruction in asm:
 
+	asm_file.write(assemb_instruction)
+
+asm_file.close()
