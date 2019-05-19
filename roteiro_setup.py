@@ -33,9 +33,7 @@ class StatementsOp(Node):
 
 			#print(ST.ST)
 
-
-
-class Func_CallerOp(Node):
+class MainCallerOp(Node):
 
 	def __init__(self,value,children):
 
@@ -45,23 +43,28 @@ class Func_CallerOp(Node):
 	def Evaluate(self,ST,w=True):
 
 		main_pos = 0
-
+	
 		for node_name in ST.ST:
 
 			if node_name == self.value.upper():
+		
+				if (len(self.children)  == len(ST.ST[node_name][0])-2) or self.value == "MAIN":
 
-				pos = 0
-				
-				for i in ST.ST[node_name][0]:
+					pos = 0
 					
-					if pos != 0:
-
-						i.Evaluate(ST)
+					for i in ST.ST[node_name][0]:
 						
-					pos = 1
+						if pos != 0:
 
-				break
+							i.Evaluate(ST)
 
+						pos = 1
+
+					break
+
+				else:
+
+					raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
 
 class FuncCallerOp(Node):
 
@@ -73,26 +76,34 @@ class FuncCallerOp(Node):
 	def Evaluate(self,ST,w=True):
 
 		main_pos = 0
-
+	
 		for node_name in ST.ST:
 
 			if node_name == self.value.upper():
 
-				break
+				if (len(self.children)  == len(ST.ST[node_name][0])-2) or self.value == "MAIN":
 
-			main_pos+=1
+					pos = 0
+					
+					for i in range (0,len(ST.ST[node_name][0])):
+						print(self.value + " oi")
+						print(pos)
+						print(len(ST.ST[node_name][0]))
+						if pos != 0 and pos != len(ST.ST[node_name][0])-1:  ###rever aqui
+							vardec = ST.ST[node_name][0][i].Evaluate(ST)
+							Assignment("=", [vardec, self.children[i-1]]).Evaluate(ST)
 
-		main_func_pos = 0
+						elif pos == len(ST.ST[node_name][0])-1:
+							
+							ST.ST[node_name][0][i].Evaluate(ST)
 
-		for child in self.children:
+						pos += 1
 
+					break
 
-			if main_func_pos == main_pos:
+				else:
 
-				child.Evaluate(ST)
-
-			main_func_pos += 1
-
+					raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
 
 class ProgramOp(Node):
 
@@ -109,7 +120,7 @@ class ProgramOp(Node):
 
 			child.children[0].Evaluate(ST)
 
-		FuncCallerOp("MAIN",self.children).Evaluate(ST)
+		MainCallerOp("MAIN",self.children).Evaluate(ST)
 
 	
 class SubDecOp(Node):
@@ -209,20 +220,24 @@ class Assignment(Node):
 
 			children1 = self.children[1].Evaluate(ST)
 
-			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
+			if len(var) == 2:
 
-				child_with_id = (children1[0],children1[1])
+				if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
-				ST.remove(self.children[0].upper())
+					child_with_id = (children1[0],children1[1])
 
-				ST.setter(self.children[0], child_with_id)
+					ST.remove(self.children[0].upper())
 
+					ST.setter(self.children[0], child_with_id)
+
+
+				else:
+
+					raise Exception ("Variavel '"+id_+"' nao é do tipo que está sendo atribuida" )
 
 			else:
 
-				raise Exception ("Variavel '"+id_+"' nao é do tipo que está sendo atribuida" )
-
-			
+				print(children1)
 
 		else:
 
@@ -472,9 +487,15 @@ class VarDec(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST)))
+		if self.value == "function":
 
+			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST),0))
 
+		else:
+
+			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST)))
+
+		return self.children[0].upper()
 
 class Token:
 
@@ -884,6 +905,10 @@ class Parser:
 
 		children = []
 
+		while nexttoken.string == '\n':
+
+			nexttoken = Parser.tokens.selectNext()
+
 		while nexttoken.string in ["sub","function"]:
 
 
@@ -947,7 +972,7 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-			children.append(VarDec("sub", [identifier , children , TypeOp("sub",[nexttoken.value])]))
+			children.append(VarDec("var", [identifier , 0 , TypeOp("sub",[nexttoken.value])]))
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -1027,19 +1052,32 @@ class Parser:
 
 		nexttoken = Parser.tokens.selectNext()
 
-		identifier_f = nexttoken.value
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+		identifier_1 = nexttoken.value.upper()
+
+		children.append(None)
 
 		nexttoken = Parser.tokens.selectNext()
+	
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
 
 		if nexttoken.string != "(":
 
-			raise Exception ("Faltou abrir ( ...")
+			raise Exception ("Faltou abrir ( no func...")
 
 		nexttoken = Parser.tokens.selectNext()
 
-		while nexttoken.string not in [")"]:
 
-			identifier = nexttoken.value
+		while nexttoken.value != ")":
+
+			identifier = nexttoken.value.upper()
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -1049,9 +1087,10 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-			children.append(VarDec("var", [identifier , 0 , TypeOp("var",[nexttoken.value])]))
+			children.append(VarDec("var", [identifier , 0 , TypeOp("function",[nexttoken.value])]))
 
 			nexttoken = Parser.tokens.selectNext()
+
 
 			if nexttoken.string in [")",","]:
 
@@ -1061,23 +1100,28 @@ class Parser:
 
 				else:
 
-					pass
+					break
 
 			else:
 
 				raise Exception("Espera-se que ou tenha , ou )")
 
+
 		nexttoken = Parser.tokens.selectNext()
 
 		if nexttoken.string != "as":
 
-				raise Exception ("Faltou declarar tipo da funct com as")
+				raise Exception ("Faltou as nos argumentos da funcao sub")
 
 		nexttoken = Parser.tokens.selectNext()
 
-		children.append(VarDec("var", [identifier_f , 0 , TypeOp("function",[nexttoken.value])]))
+		tipo = TypeOp(nexttoken.string,[nexttoken.string])
 
 		nexttoken = Parser.tokens.selectNext()
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
 
 		if nexttoken.string == "end":
 
@@ -1085,16 +1129,44 @@ class Parser:
 
 			if nexttoken.string != "function":
 
-				raise Exception ("Faltou fechar sub")
+				raise Exception ("Faltou fechar subbb")
+
+			else:
+
+				while nexttoken.string == "\n":
+
+					nexttoken = Parser.tokens.selectNext()
 
 		else:
 
-			stmt = Parser.Statement()
+			stmt = Parser.Statements()
+
+			while nexttoken.string == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
 
 			children.append(stmt)
 
+			if nexttoken.string == "end":
 
-		return FuncDecOp("sub",children)
+				nexttoken = Parser.tokens.selectNext()
+
+
+				if nexttoken.string != "function":
+
+					raise Exception ("Faltou fechar function")
+
+				else:
+
+					nexttoken = Parser.tokens.selectNext()
+
+					while nexttoken.string == "\n":
+
+						nexttoken = Parser.tokens.selectNext()
+
+		children[0] = (VarDec("function", [identifier_1 , children , tipo]))
+
+		return FuncDecOp("function",children)
 
 
 	def Statements():
@@ -1187,6 +1259,13 @@ class Parser:
 
 				node = Parser.RelExpression()
 
+				print("hello")
+				print(node)
+
+				children.append(node)
+
+				print(children)
+
 				if nexttoken.string in [")",","]:
 
 					if nexttoken.string == ",":
@@ -1197,14 +1276,14 @@ class Parser:
 
 						nexttoken = Parser.tokens.selectNext()
 						break
-
+					
 				else:
 
 					raise Exception("Espera-se que ou tenha , ou )")
 
 			nexttoken = Parser.tokens.selectNext()
 
-			return Func_CallerOp(identifier,children)
+			return FuncCallerOp(identifier,children)
 
 		elif nexttoken.string == "print":
 
