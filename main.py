@@ -10,12 +10,28 @@ class Node:
 
 		self.value = value
 		self.children = children
-		self.id = Node.newId()
 	
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
+
 
 		pass
+
+
+class StatementsOp(Node):
+
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST,w=True):
+
+		for child in self.children:
+
+			child.Evaluate(ST)
+
 
 class FuncCallerOp(Node):
 
@@ -31,47 +47,34 @@ class FuncCallerOp(Node):
 
 		ST_new = SymbolTable(ST)
 
-		print("Abaixo é real:")
-		print(ST.ST)
-		print(ST_new.ST)
+		s = ST.getter(self.value.upper())
 
-		for node_name in ST.ST:
-	
-			if node_name == self.value.upper:
+		ST_new.ST[self.value.upper()] =  (None, s[1])
 
-				if ST.ST[node_name][1] != "sub":
+		if self.value.upper() != "MAIN":
 
-					ST_new.ST[self.value.upper()] =  (None, ST.ST[node_name][1])
-					print(ST_new.ST)
-
-				if (len(self.children)  == len(ST.ST[node_name][0])-2):
-
-					pos = 0
-						
-					for i in range (0,len(ST.ST[node_name][0])):
+			if (len(self.children) == len(s[0])-2):
 					
-						if pos != 0 and pos != len(ST.ST[node_name][0])-1:  
-
-							Assignment("=", [ST.ST[node_name][0][i].Evaluate(ST_new), self.children[i-1]]).Evaluate(ST_new)
-
-						elif pos == len(ST.ST[node_name][0])-1:
-								
-							ST.ST[node_name][0][i].Evaluate(ST_new)
-
-						pos += 1
-
-					break
-
-				else:
-
-					raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
-
+				for i in range (1,len(s[0])-1):
 			
-			if True:
+					Assignment("=", [s[0][i].Evaluate(ST_new), self.children[i-1]]).Evaluate(ST_new)
 
-				valor = ST_new.getter(self.value.upper())
+				s[0][-1].Evaluate(ST_new)	
+				print(ST_new.ST)	
+				
+			else:
 
-				return valor
+				raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
+		else:
+
+			ST.ST["MAIN"][0][-1].Evaluate(ST_new)
+			print(ST_new.ST)
+			
+		if True:
+
+			valor = ST_new.getter(self.value.upper())
+
+			return valor
 
 
 
@@ -87,8 +90,6 @@ class ProgramOp(Node):
 		for child in self.children:
 
 			child.children[0].Evaluate(ST)
-
-		print(ST.ST)
 
 		FuncCallerOp("MAIN",self.children).Evaluate(ST)
 
@@ -140,20 +141,6 @@ class FuncDecOp(Node):
 
 				child.Evaluate(ST_new)
 
-class StatementsOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST):
-
-		for child in self.children:
-
-			child.Evaluate(ST,w)
-
-			#print(ST.ST)
 
 class TypeOp(Node):
 
@@ -162,7 +149,7 @@ class TypeOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		if self.children[0] == "integer":
 
@@ -171,6 +158,14 @@ class TypeOp(Node):
 		elif self.children[0] == "boolean":
 
 			return "boolean"
+
+		elif self.children[0] == "sub":
+
+			return "sub"
+
+		elif self.children[0] == "function":
+
+			return "function"
 
 		else:
 
@@ -186,9 +181,9 @@ class PrintOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
-		print(self.children[0].Evaluate(ST,w)[0])
+		print(self.children[0].Evaluate(ST)[0])
 
 
 
@@ -199,29 +194,33 @@ class Assignment(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 
 		var = ST.getter(self.children[0].upper())
 
 		if var != None:
 
-			children1 = self.children[1].Evaluate(ST,w)
+			children1 = self.children[1].Evaluate(ST)
 
 			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
-				id_ = ST.getter_id(self.children[0])
+				child_with_id = (children1[0],children1[1])
 
-				child_with_id = (children1[0],children1[1],id_)
+				try:
 
-				ST.remove(self.children[0].upper())
+					ST.remove(self.children[0].upper())
+
+				except:
+
+					pass
 
 				ST.setter(self.children[0], child_with_id)
 
+
 			else:
 
-				raise Exception ("Variavel '"+id_+"' nao é do tipo que está sendo atribuida" )
-
+				raise Exception ("Variavel '"+self.children[0].upper()+"' nao é do tipo que está sendo atribuida" )
 			
 
 		else:
@@ -235,15 +234,12 @@ class WhileOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
-		node_id = Node.newNodeId()
 		
-		while self.children[0].Evaluate(ST,w)[0] == True:
+		while self.children[0].Evaluate(ST)[0] == True:
 
-			self.children[1].Evaluate(ST,w)
-
-
+			self.children[1].Evaluate(ST)
 
 
 class IfOp(Node):
@@ -253,14 +249,14 @@ class IfOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 
 		if self.value == "if":
 
-			if self.children[0].Evaluate(ST,w)[0] == True:
+			if self.children[0].Evaluate(ST)[0] == True:
 
-				self.children[1].Evaluate(ST,w)
+				self.children[1].Evaluate(ST)
 
 			else:
 
@@ -269,45 +265,52 @@ class IfOp(Node):
 
 		elif self.value == "else":
 			
-			if self.children[0].Evaluate(ST,w)[0] == True:
+			if self.children[0].Evaluate(ST)[0] == True:
 
-				self.children[1].Evaluate(ST,w)
+				self.children[1].Evaluate(ST)
 
 			else:
 
-				self.children[2].Evaluate(ST,w)
+				self.children[2].Evaluate(ST)
 
 
 class SymbolTable:
 
-	def __init__ (self):
+	def __init__ (self,ancestor):
 
 		self.ST = {}
+		self.ancestor = ancestor
 
 	def getter(self,key):
 
 		if key in self.ST:
 
-			return self.ST[key]
+			valor = self.ST[key]
 
 		else:
 
-			return None
+			if self.ancestor != None:
 
-	def getter_id(self,key):
+				valor = self.ancestor.getter(key)
 
-		if key in self.ST:
+			else:
 
-			return self.ST[key][2]
+				raise Exception ("Variável "+key+ " não foi encontrada na ST")
 
-		else:
-
-			return None
-
+		return valor
 
 	def setter(self,key,value):
 
+		try:
+
+			del self.ST[key]
+
+		except:
+
+			pass
+
 		self.ST.update({key: value})
+
 
 	def remove(self,key):
 
@@ -322,7 +325,7 @@ class Identifier(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		pass
 
@@ -335,15 +338,11 @@ class BinOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
-
-			node_id = Node.getNodeId()
+	def Evaluate(self,ST,w=True):
 			
-			children0 = self.children[0].Evaluate(ST,w)
+			children0 = self.children[0].Evaluate(ST)
 
-
-			children1 = self.children[1].Evaluate(ST,w)
-
+			children1 = self.children[1].Evaluate(ST)
 
 			if children1[1] != children0[1]:
 
@@ -353,38 +352,29 @@ class BinOp(Node):
 
 				if self.value == "plus":
 
-
-
 					return (children0[0] + children1[0] , children0[1])
 
 				if self.value == "minus":
-
 
 					return (children0[0] - children1[0] , children0[1])
 
 				if self.value == "times":
 
-
 					return (children0[0] * children1[0] , children0[1])
 
 				if self.value == "division":
-
 
 					return (children0[0] // children1[0] , children0[1])
 
 				if self.value == "=":
 
-
 					return (children0[0] == children1[0] , "boolean")
 
 				if self.value == "and":
 
-
-
 					return (children0[0] and children1[0] , "boolean")
 
 				if self.value == "or":
-
 
 					return (children0[0] or children1[0] , "boolean")
 
@@ -394,12 +384,9 @@ class BinOp(Node):
 
 				if self.value == ">":
 
-
 					return (children0[0] > children1[0] , "boolean")
 
 				if self.value == "<":
-
-
 
 					return (children0[0] < children1[0] , "boolean")
 
@@ -413,19 +400,19 @@ class UnOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		if self.value == "plus":
 
-			return  (self.children[0].Evaluate(ST,w),"integer")
+			return  (self.children[0].Evaluate(ST),"integer")
 
 		if self.value == "minus":
 
-			return (-self.children[0].Evaluate(ST,w)[0],"integer")
+			return (-self.children[0].Evaluate(ST)[0],"integer")
 
 		if self.value == "not":
 
-			return (not self.children[0].Evaluate(ST,w),"integer")
+			return (not self.children[0].Evaluate(ST),"integer")
 
 
 
@@ -437,8 +424,7 @@ class IntVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
-
+	def Evaluate(self,ST,w=True):
 
 		return (self.value,"integer")
 
@@ -451,7 +437,7 @@ class BoolVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		return (self.value,"boolean")
 
@@ -463,7 +449,7 @@ class InputOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		return (int(input("Insira um número: \n")),"integer")
 
@@ -475,8 +461,7 @@ class VarVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
-
+	def Evaluate(self,ST,w=True):
 
 		return ST.getter(self.value.upper())
 
@@ -488,7 +473,7 @@ class NoOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		pass
 
@@ -500,11 +485,17 @@ class VarDec(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
+		if self.value == "function":
 
-		ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST,w),id_))
+			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST),0))
 
+		else:
+
+			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST)))
+
+		return self.children[0].upper()
 
 
 class Token:
@@ -1179,8 +1170,6 @@ class Parser:
 		return FuncDecOp("function",children)
 
 
-
-
 	def Statements():
 
 		children = []
@@ -1202,6 +1191,7 @@ class Parser:
 		node = StatementsOp("Statements",children)
 
 		return node 
+
 
 
 	def Statement():
@@ -1249,6 +1239,49 @@ class Parser:
 			nexttoken = Parser.tokens.selectNext() 
 
 			return node
+
+		elif nexttoken.string == "call":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			identifier = nexttoken.value
+
+			print("iden " +identifier)
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			if nexttoken.string != "(":
+
+				raise Exception ("Espara-se ( para parametros da funcao")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			children = []
+
+			while nexttoken.string != ")":
+
+				node = Parser.RelExpression()
+
+				children.append(node)
+
+				if nexttoken.string in [")",","]:
+
+					if nexttoken.string == ",":
+
+						nexttoken = Parser.tokens.selectNext()
+
+					else:
+
+						nexttoken = Parser.tokens.selectNext()
+						break
+					
+				else:
+
+					raise Exception("Espera-se que ou tenha , ou )")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			return FuncCallerOp(identifier,children)
 
 		elif nexttoken.string == "print":
 
@@ -1344,6 +1377,8 @@ class Parser:
 
 		else:
 
+			print(nexttoken.value)
+
 			raise Exception ("Algo deu ruim")
 
 	def RelExpression():
@@ -1361,7 +1396,6 @@ class Parser:
 			node2 = Parser.parserExpression()
 
 			node = BinOp(comp_signal,[node1,node2])
-
 
 			return node
 
@@ -1399,11 +1433,43 @@ class Parser:
 
 		elif nexttoken.string == "identifier":
 
-			node = VarVal(Parser.tokens.actual.value,[])
+			identifier = nexttoken.value
 
 			nexttoken = Parser.tokens.selectNext()
 
-			return node
+			children = []
+
+			if nexttoken.string == "(":
+
+				nexttoken = Parser.tokens.selectNext()
+				
+				while nexttoken.string != ")":
+					
+					node = Parser.RelExpression()
+					
+					children.append(node)
+
+					if nexttoken.string == ",":
+
+						nexttoken = Parser.tokens.selectNext()
+
+					elif nexttoken.string == ")":
+
+						nexttoken = Parser.tokens.selectNext()
+
+						break
+
+				node = FuncCallerOp(identifier,children)
+
+				return node
+
+
+
+			else:
+
+				node = VarVal(identifier,[])
+
+				return node
 
 		elif nexttoken.string == "(":
 
@@ -1412,8 +1478,8 @@ class Parser:
 			soma = Parser.RelExpression()
 
 			if nexttoken.string != ")":
-
-				raise Exception ("Faltou fechar parênteses")
+				
+				raise Exception ("Faltou fechar parênteses tendeu")
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -1547,7 +1613,7 @@ class Parser:
 
 		else:
 
-			print (Parser.tokens.actual.string)
+			print (Parser.tokens.actual.value)
 
 			raise Exception("Parser Error: EOF")
 
@@ -1558,11 +1624,9 @@ with open(file_name) as testfile:
 	string = testfile.read()
 
 
-ST1 = SymbolTable()
+ST = SymbolTable(None)
 
-Parser.run(string).Evaluate(ST1)
-
-print("ST = ",ST1.ST)
+Parser.run(string).Evaluate(ST)
 
 
 

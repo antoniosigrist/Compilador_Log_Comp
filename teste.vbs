@@ -41,5 +41,5 @@ function oi(hhh as boolean, tt as integer) as integer
 hhh = false
 print 3245
 
-oi = tt
+oi = 2000
 end function
