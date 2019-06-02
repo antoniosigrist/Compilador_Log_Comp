@@ -3,7 +3,6 @@
 import sys
 
 
-
 class Node:
 
 
@@ -15,10 +14,12 @@ class Node:
 
 	def Evaluate(self,ST,w=True):
 
+
 		pass
 
 
 class StatementsOp(Node):
+
 
 	def __init__(self,value,children):
 
@@ -31,40 +32,6 @@ class StatementsOp(Node):
 
 			child.Evaluate(ST)
 
-			#print(ST.ST)
-
-class MainCallerOp(Node):
-
-	def __init__(self,value,children):
-
-		self.value = value
-		self.children = children
-
-	def Evaluate(self,ST,w=True):
-
-		main_pos = 0
-	
-		for node_name in ST.ST:
-
-			if node_name == self.value.upper():
-		
-				if (len(self.children)  == len(ST.ST[node_name][0])-2) or self.value == "MAIN":
-
-					pos = 0
-					
-					for i in ST.ST[node_name][0]:
-						
-						if pos != 0:
-
-							i.Evaluate(ST)
-
-						pos = 1
-
-					break
-
-				else:
-
-					raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
 
 class FuncCallerOp(Node):
 
@@ -73,37 +40,43 @@ class FuncCallerOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST,w=True):
+
+	def Evaluate(self,ST):
 
 		main_pos = 0
-	
-		for node_name in ST.ST:
 
-			if node_name == self.value.upper():
+		ST_new = SymbolTable(ST)
 
-				if (len(self.children)  == len(ST.ST[node_name][0])-2) or self.value == "MAIN":
+		s = ST.getter(self.value.upper())
 
-					pos = 0
+		ST_new.ST[self.value.upper()] =  (None, s[1])
+
+		if self.value.upper() != "MAIN":
+
+			if (len(self.children) == len(s[0])-2):
 					
-					for i in range (0,len(ST.ST[node_name][0])):
-						print(self.value + " oi")
-						print(pos)
-						print(len(ST.ST[node_name][0]))
-						if pos != 0 and pos != len(ST.ST[node_name][0])-1:  ###rever aqui
-							vardec = ST.ST[node_name][0][i].Evaluate(ST)
-							Assignment("=", [vardec, self.children[i-1]]).Evaluate(ST)
+				for i in range (1,len(s[0])-1):
+			
+					Assignment("=", [s[0][i].Evaluate(ST_new), self.children[i-1]]).Evaluate(ST_new)
 
-						elif pos == len(ST.ST[node_name][0])-1:
-							
-							ST.ST[node_name][0][i].Evaluate(ST)
+				s[0][-1].Evaluate(ST_new)	
+				print(ST_new.ST)	
+				
+			else:
 
-						pos += 1
+				raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
+		else:
 
-					break
+			ST.ST["MAIN"][0][-1].Evaluate(ST_new)
+			print(ST_new.ST)
+			
+		if True:
 
-				else:
+			valor = ST_new.getter(self.value.upper())
 
-					raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
+			return valor
+
+
 
 class ProgramOp(Node):
 
@@ -116,11 +89,9 @@ class ProgramOp(Node):
 
 		for child in self.children:
 
-			print(child)
-
 			child.children[0].Evaluate(ST)
 
-		MainCallerOp("MAIN",self.children).Evaluate(ST)
+		FuncCallerOp("MAIN",self.children).Evaluate(ST)
 
 	
 class SubDecOp(Node):
@@ -144,7 +115,7 @@ class SubDecOp(Node):
 
 			else:
 
-				child.Evaluate(ST)
+				child.Evaluate(ST_new)
 
 
 class FuncDecOp(Node):
@@ -156,7 +127,19 @@ class FuncDecOp(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		pass
+		first_element = 0
+
+		for child in self.children:
+
+			if first_element == 0:
+
+				first_element+=1
+
+				pass
+
+			else:
+
+				child.Evaluate(ST_new)
 
 
 class TypeOp(Node):
@@ -220,24 +203,25 @@ class Assignment(Node):
 
 			children1 = self.children[1].Evaluate(ST)
 
-			if len(var) == 2:
+			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
-				if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
+				child_with_id = (children1[0],children1[1])
 
-					child_with_id = (children1[0],children1[1])
+				try:
 
 					ST.remove(self.children[0].upper())
 
-					ST.setter(self.children[0], child_with_id)
+				except:
 
+					pass
 
-				else:
+				ST.setter(self.children[0], child_with_id)
 
-					raise Exception ("Variavel '"+id_+"' nao é do tipo que está sendo atribuida" )
 
 			else:
 
-				print(children1)
+				raise Exception ("Variavel '"+self.children[0].upper()+"' nao é do tipo que está sendo atribuida" )
+			
 
 		else:
 
@@ -292,22 +276,38 @@ class IfOp(Node):
 
 class SymbolTable:
 
-	def __init__ (self):
+	def __init__ (self,ancestor):
 
 		self.ST = {}
+		self.ancestor = ancestor
 
 	def getter(self,key):
 
 		if key in self.ST:
 
-			return self.ST[key]
+			valor = self.ST[key]
 
 		else:
 
-			return None
+			if self.ancestor != None:
 
+				valor = self.ancestor.getter(key)
+
+			else:
+
+				raise Exception ("Variável "+key+ " não foi encontrada na ST")
+
+		return valor
 
 	def setter(self,key,value):
+
+		try:
+
+			del self.ST[key]
+
+		except:
+
+			pass
 
 		self.ST.update({key: value})
 
@@ -496,6 +496,7 @@ class VarDec(Node):
 			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST)))
 
 		return self.children[0].upper()
+
 
 class Token:
 
@@ -1245,6 +1246,8 @@ class Parser:
 
 			identifier = nexttoken.value
 
+			print("iden " +identifier)
+
 			nexttoken = Parser.tokens.selectNext() 
 
 			if nexttoken.string != "(":
@@ -1259,12 +1262,7 @@ class Parser:
 
 				node = Parser.RelExpression()
 
-				print("hello")
-				print(node)
-
 				children.append(node)
-
-				print(children)
 
 				if nexttoken.string in [")",","]:
 
@@ -1443,21 +1441,25 @@ class Parser:
 
 			if nexttoken.string == "(":
 
+				nexttoken = Parser.tokens.selectNext()
+				
 				while nexttoken.string != ")":
-
+					
 					node = Parser.RelExpression()
-
+					
 					children.append(node)
 
 					if nexttoken.string == ",":
 
-						nexttoken = nexttoken.Parser.selectNext()
+						nexttoken = Parser.tokens.selectNext()
 
 					elif nexttoken.string == ")":
 
+						nexttoken = Parser.tokens.selectNext()
+
 						break
 
-				### ENTENDER ESSA PARTE DO CODIGO
+				node = FuncCallerOp(identifier,children)
 
 				return node
 
@@ -1476,8 +1478,8 @@ class Parser:
 			soma = Parser.RelExpression()
 
 			if nexttoken.string != ")":
-
-				raise Exception ("Faltou fechar parênteses")
+				
+				raise Exception ("Faltou fechar parênteses tendeu")
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -1622,11 +1624,9 @@ with open(file_name) as testfile:
 	string = testfile.read()
 
 
-ST1 = SymbolTable()
+ST = SymbolTable(None)
 
-Parser.run(string).Evaluate(ST1)
-
-print("ST = ",ST1.ST)
+Parser.run(string).Evaluate(ST)
 
 
 
