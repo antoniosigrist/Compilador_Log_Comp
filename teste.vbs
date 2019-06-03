@@ -5,7 +5,7 @@ Dim n as Integer
 Dim f as Integer 
 dim b as integer
 dim h as integer
-dim b as integer
+dim b as boolean
 
 n=5
 i=2
@@ -37,9 +37,9 @@ end sub
 
 
 
-function oi(hhh as boolean, tt as integer) as integer
+function oi(hhh as boolean, tt as integer) as boolean
 hhh = false
 print 3245
 
-oi = 2000
+oi = false
 end function

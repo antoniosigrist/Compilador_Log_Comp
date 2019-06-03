@@ -158,11 +158,11 @@ class TypeOp(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		if self.children[0] == "integer":
+		if self.children[0] == "integer" or self.children[0] == "int":
 
 			return "integer"
 
-		elif self.children[0] == "boolean":
+		elif self.children[0] == "boolean" or self.children[0] == "bool":
 
 			return "boolean"
 
@@ -175,6 +175,8 @@ class TypeOp(Node):
 			return "function"
 
 		else:
+
+			print (self.children[0])
 
 			raise Exception ("Espera-se tipos integer or boolean")
 
@@ -223,7 +225,7 @@ class Assignment(Node):
 					pass
 
 				ST.setter(self.children[0], child_with_id)
-
+				print(ST.ST)
 
 			else:
 
@@ -346,6 +348,7 @@ class BinOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST,w=True):
+
 			
 			children0 = self.children[0].Evaluate(ST)
 
@@ -394,7 +397,7 @@ class BinOp(Node):
 					return (children0[0] > children1[0] , "boolean")
 
 				if self.value == "<":
-
+					
 					return (children0[0] < children1[0] , "boolean")
 
 			
@@ -631,13 +634,6 @@ class Tokenizer:
 
 					return self.actual
 
-				elif variable == "END":
-
-					self.actual.string = "end"
-					self.actual.value = "end"
-					self.position = i
-
-					return self.actual
 
 				elif variable == "WHILE":
 
@@ -719,6 +715,14 @@ class Tokenizer:
 
 					return self.actual
 
+				elif variable == "END":
+
+					self.actual.string = "end"
+					self.actual.value = "end"
+					self.position = i
+
+					return self.actual
+
 				elif variable == "INTEGER":
 
 					self.actual.string = "integer"
@@ -747,6 +751,14 @@ class Tokenizer:
 
 					self.actual.string = "input"
 					self.actual.value = "input"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "DEF":
+
+					self.actual.string = "def"
+					self.actual.value = "def"
 					self.position = i+1
 
 					return self.actual
@@ -934,17 +946,15 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-		while nexttoken.string in ["sub","function"]:
+		while nexttoken.string in ["def","function"]:
 
+			if nexttoken.string == "def":
 
-			if nexttoken.string == "sub":
-
-				node = Parser.SubDec()
+				node = Parser.SubDec(BT)
 
 			elif nexttoken.string == "function":
 
-				node = Parser.FuncDec()
-
+				node = Parser.FuncDec(BT)
 
 			children.append(node)
 
@@ -1001,7 +1011,6 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-
 			if nexttoken.string in [")",","]:
 
 				if nexttoken.string == ",":
@@ -1038,8 +1047,9 @@ class Parser:
 					nexttoken = Parser.tokens.selectNext()
 
 		else:
-
-			stmt = Parser.Statements()
+	
+			stmt = Parser.Statements(BT)
+		
 
 			while nexttoken.string == "\n":
 
@@ -1047,10 +1057,10 @@ class Parser:
 
 			children.append(stmt)
 
+
 			if nexttoken.string == "end":
 
 				nexttoken = Parser.tokens.selectNext()
-
 
 				if nexttoken.string != "sub":
 
@@ -1200,9 +1210,9 @@ class Parser:
 		
 		nexttoken = Parser.tokens.actual
 
-		while nexttoken.string != "EOF" and nexttoken.string != "end" and nexttoken.string != "wend" and nexttoken.string != "else":
+		while nexttoken.string != "EOF" and nexttoken.string != "else" and nexttoken.value not in BT.BT and nexttoken.string != "end":
 
-			child = Parser.Statement()
+			child = Parser.Statement(BT)
 
 			if child != None:
 
@@ -1270,8 +1280,6 @@ class Parser:
 
 			identifier = nexttoken.value
 
-			print("iden " +identifier)
-
 			nexttoken = Parser.tokens.selectNext() 
 
 			if nexttoken.string != "(":
@@ -1325,7 +1333,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 					
-				node = VarDec("atr", [identifier , Parser.parserExpression() , tipoop])
+				node = VarDec("atr", [identifier , Parser.RelExpression() , tipoop])
 
 				return node
 
@@ -1337,11 +1345,16 @@ class Parser:
 
 		elif nexttoken.string == "print":
 
-			nexttoken = Parser.tokens.selectNext() 
-
-			node = PrintOp("print",[Parser.parserExpression()])
 
 			nexttoken = Parser.tokens.selectNext() 
+
+			node = PrintOp("print",[Parser.RelExpression()])
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			while nexttoken.value == "\n":
+
+				nexttoken = Parser.tokens.selectNext() 
 
 			return node
 
@@ -1406,6 +1419,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
+
 				node_else = Parser.Statements(BT)
 
 
@@ -1417,6 +1431,10 @@ class Parser:
 			nexttoken = Parser.tokens.selectNext()
 
 			node = IfOp(value,[node_rel,node_true,node_else])
+
+			while nexttoken.value == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
 
 			return node
 

@@ -1,14 +1,18 @@
-int x = 19 * 98 - 1/2
+def main()
+
+int x
 bool y = fAlSe
 
 
-'y = true
+x = 19*45
+
+print x
 
 if 0 < 7 abudabe
 	
-	while x < 17 Blocowhile
+	while x = 17 Blocowhile
 
-		if x > 5 Blocoxis
+		if x = 5 Blocoxis
 
 			x = x + 2
 			y=True
@@ -26,3 +30,5 @@ abudabe
 y= true
 
 print y
+
+end sub
