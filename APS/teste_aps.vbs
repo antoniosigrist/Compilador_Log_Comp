@@ -1,12 +1,15 @@
-def main()
-
-int x
-bool y = fAlSe
 
 
-x = 19*45
+void main()
 
-print x
+int x;
+bool y = falSe;
+int a;
+
+
+x = 19*45;
+
+print x;
 
 if 0 < 7 abudabe
 	
@@ -14,12 +17,13 @@ if 0 < 7 abudabe
 
 		if x = 5 Blocoxis
 
-			x = x + 2
-			y=True
+			x = x + 2;
+			
+			y = True;
 
 		else
 
-			x = x + 1
+			x = x + 1;
 
 		Blocoxis
 
@@ -27,8 +31,20 @@ if 0 < 7 abudabe
 
 abudabe
 
-y= true
+y = true;
 
-print y
+print y;
 
-end sub
+a = abacate(3);
+
+end function
+
+
+int abacate(var as int)
+
+	abacate = var;
+
+end function
+
+
+

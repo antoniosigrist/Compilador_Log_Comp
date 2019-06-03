@@ -287,6 +287,15 @@ class SymbolTable:
 
 			valor = self.ST[key]
 
+			if valor[0] == None:
+
+				try:
+
+					valor = self.ancestor.getter(key)
+
+				except:
+
+					raise Exception ("Voce tentou fazer recursao em "+key+ "?")
 		else:
 
 			if self.ancestor != None:

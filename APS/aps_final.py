@@ -747,6 +747,14 @@ class Tokenizer:
 
 					return self.actual
 
+				elif variable == "VOID":
+
+					self.actual.string = "void"
+					self.actual.value = "void"
+					self.position = i
+
+					return self.actual
+
 				elif variable == "INPUT":
 
 					self.actual.string = "input"
@@ -890,6 +898,14 @@ class Tokenizer:
 
 				return self.actual
 
+			elif self.origin[i] == ";":
+
+				self.actual.string = ";"
+				self.actual.value = ";"
+				self.position = i+1
+
+				return self.actual
+
 			elif self.origin[i] == ">":
 
 				self.actual.string = ">"
@@ -946,13 +962,13 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-		while nexttoken.string in ["def","function"]:
+		while nexttoken.string in ["def","function","int","bool","void"]:
 
-			if nexttoken.string == "def":
+			if nexttoken.string in ["def","void"]:
 
 				node = Parser.SubDec(BT)
 
-			elif nexttoken.string == "function":
+			elif nexttoken.string in ["function","int","bool"]:
 
 				node = Parser.FuncDec(BT)
 
@@ -1036,7 +1052,7 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-			if nexttoken.string != "sub":
+			if nexttoken.string != "function":
 
 				raise Exception ("Faltou fechar subbb")
 
@@ -1062,7 +1078,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				if nexttoken.string != "sub":
+				if nexttoken.string != "function":
 
 					raise Exception ("Faltou fechar sub")
 
@@ -1084,6 +1100,13 @@ class Parser:
 		nexttoken = Parser.tokens.actual
 
 		children = []
+
+		if nexttoken.string == "int":
+			t = "integer"
+		elif nexttoken.string == "bool":
+			t = "boolean"
+
+		tipo = TypeOp(t,[t])
 
 		nexttoken = Parser.tokens.selectNext()
 
@@ -1144,15 +1167,9 @@ class Parser:
 
 		nexttoken = Parser.tokens.selectNext()
 
-		if nexttoken.string != "as":
 
-				raise Exception ("Faltou as nos argumentos da funcao sub")
+		
 
-		nexttoken = Parser.tokens.selectNext()
-
-		tipo = TypeOp(nexttoken.string,[nexttoken.string])
-
-		nexttoken = Parser.tokens.selectNext()
 
 		while nexttoken.string == "\n":
 
@@ -1174,7 +1191,7 @@ class Parser:
 
 		else:
 
-			stmt = Parser.Statements()
+			stmt = Parser.Statements(BT)
 
 			while nexttoken.string == "\n":
 
@@ -1221,6 +1238,8 @@ class Parser:
 			if nexttoken.string == "\n":
 
 				nexttoken = Parser.tokens.selectNext()
+
+
 
 		node = StatementsOp("Statements",children)
 
@@ -1443,6 +1462,9 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
+		elif nexttoken.string == ";":
+
+			nexttoken = Parser.tokens.selectNext()
 
 		else:
 

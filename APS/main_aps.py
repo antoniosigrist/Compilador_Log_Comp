@@ -5,28 +5,148 @@ import sys
 
 class Node:
 
+
 	def __init__(self,value,children):
 
 		self.value = value
 		self.children = children
+	
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
+
 
 		pass
 
 
+class BlockTable:
+
+	def __init__ (self):
+
+		self.BT = []
+
+
 class StatementsOp(Node):
+
 
 	def __init__(self,value,children):
 
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		for child in self.children:
 
 			child.Evaluate(ST)
+
+
+class FuncCallerOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+
+	def Evaluate(self,ST):
+
+		main_pos = 0
+
+		ST_new = SymbolTable(ST)
+
+		s = ST.getter(self.value.upper())
+
+		ST_new.ST[self.value.upper()] =  (None, s[1])
+
+		if self.value.upper() != "MAIN":
+
+			if (len(self.children) == len(s[0])-2):
+					
+				for i in range (1,len(s[0])-1):
+			
+					Assignment("=", [s[0][i].Evaluate(ST_new), self.children[i-1]]).Evaluate(ST_new)
+
+				s[0][-1].Evaluate(ST_new)	
+				print(ST_new.ST)	
+				
+			else:
+
+				raise Exception ("Funcao '"+self.value+"' foi chamado com numero errado de argumentos" )
+		else:
+
+			ST.ST["MAIN"][0][-1].Evaluate(ST_new)
+			print(ST_new.ST)
+			
+		if True:
+
+			valor = ST_new.getter(self.value.upper())
+
+			return valor
+
+
+
+class ProgramOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST,w=True):
+
+		for child in self.children:
+
+			child.children[0].Evaluate(ST)
+
+		FuncCallerOp("MAIN",self.children).Evaluate(ST)
+
+	
+class SubDecOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST,w=True):
+
+		first_element = 0
+
+		for child in self.children:
+
+			if first_element == 0:
+
+				first_element+=1
+
+				pass
+
+			else:
+
+				child.Evaluate(ST_new)
+
+
+class FuncDecOp(Node):
+
+	def __init__(self,value,children):
+
+		self.value = value
+		self.children = children
+
+	def Evaluate(self,ST,w=True):
+
+		first_element = 0
+
+		for child in self.children:
+
+			if first_element == 0:
+
+				first_element+=1
+
+				pass
+
+			else:
+
+				child.Evaluate(ST_new)
 
 
 class TypeOp(Node):
@@ -36,17 +156,27 @@ class TypeOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
-		if self.children[0] == "int":
+		if self.children[0] == "integer" or self.children[0] == "int":
 
 			return "integer"
 
-		elif self.children[0] == "bool":
+		elif self.children[0] == "boolean" or self.children[0] == "bool":
 
 			return "boolean"
 
+		elif self.children[0] == "sub":
+
+			return "sub"
+
+		elif self.children[0] == "function":
+
+			return "function"
+
 		else:
+
+			print (self.children[0])
 
 			raise Exception ("Espera-se tipos integer or boolean")
 
@@ -60,7 +190,7 @@ class PrintOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		print(self.children[0].Evaluate(ST)[0])
 
@@ -73,7 +203,7 @@ class Assignment(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 
 		var = ST.getter(self.children[0].upper())
@@ -84,12 +214,23 @@ class Assignment(Node):
 
 			if (children1[1] == "boolean" and var[1] == "boolean") or (children1[1] == "integer" and var[1] == "integer"):
 
-				ST.remove(self.children[0].upper())
-				ST.setter(self.children[0], children1)
+				child_with_id = (children1[0],children1[1])
+
+				try:
+
+					ST.remove(self.children[0].upper())
+
+				except:
+
+					pass
+
+				ST.setter(self.children[0], child_with_id)
+				print(ST.ST)
 
 			else:
 
-				raise Exception ("Variavel '"+str(self.children[0])+"' nao é do tipo que está sendo atribuida" )
+				raise Exception ("Variavel '"+self.children[0].upper()+"' nao é do tipo que está sendo atribuida" )
+			
 
 		else:
 
@@ -102,7 +243,8 @@ class WhileOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
+
 		
 		while self.children[0].Evaluate(ST)[0] == True:
 
@@ -116,7 +258,8 @@ class IfOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
+
 
 		if self.value == "if":
 
@@ -127,6 +270,7 @@ class IfOp(Node):
 			else:
 
 				pass
+
 
 		elif self.value == "else":
 			
@@ -141,34 +285,46 @@ class IfOp(Node):
 
 class SymbolTable:
 
-	def __init__ (self):
+	def __init__ (self,ancestor):
 
 		self.ST = {}
+		self.ancestor = ancestor
 
 	def getter(self,key):
 
 		if key in self.ST:
 
-			return self.ST[key]
+			valor = self.ST[key]
 
 		else:
 
-			return None
+			if self.ancestor != None:
 
+				valor = self.ancestor.getter(key)
+
+			else:
+
+				raise Exception ("Variável "+key+ " não foi encontrada na ST")
+
+		return valor
 
 	def setter(self,key,value):
 
+		try:
+
+			del self.ST[key]
+
+		except:
+
+			pass
+
 		self.ST.update({key: value})
+
 
 	def remove(self,key):
 
 		del self.ST[key]
 
-class BlockTable:
-
-	def __init__ (self):
-
-		self.BT = []
 
 
 class Identifier(Node):
@@ -178,9 +334,10 @@ class Identifier(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		pass
+
 
 
 class BinOp(Node):
@@ -190,7 +347,8 @@ class BinOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
+
 			
 			children0 = self.children[0].Evaluate(ST)
 
@@ -220,15 +378,15 @@ class BinOp(Node):
 
 				if self.value == "=":
 
-					return (children0[0] == children1[0] , children0[1])
+					return (children0[0] == children1[0] , "boolean")
 
 				if self.value == "and":
 
-					return (children0[0] and children1[0] , children0[1])
+					return (children0[0] and children1[0] , "boolean")
 
 				if self.value == "or":
 
-					return (children0[0] or children1[0] , children0[1])
+					return (children0[0] or children1[0] , "boolean")
 
 				if children0[1] == "boolean" or children1[1] == "boolean":
 
@@ -236,11 +394,11 @@ class BinOp(Node):
 
 				if self.value == ">":
 
-					return (children0[0] > children1[0] , children0[1])
+					return (children0[0] > children1[0] , "boolean")
 
 				if self.value == "<":
-
-					return (children0[0] < children1[0] , children0[1])
+					
+					return (children0[0] < children1[0] , "boolean")
 
 			
 			
@@ -252,11 +410,11 @@ class UnOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		if self.value == "plus":
 
-			return  self.children[0].Evaluate(ST)
+			return  (self.children[0].Evaluate(ST),"integer")
 
 		if self.value == "minus":
 
@@ -264,7 +422,10 @@ class UnOp(Node):
 
 		if self.value == "not":
 
-			return not self.children[0].Evaluate(ST)
+			return (not self.children[0].Evaluate(ST),"integer")
+
+
+
 
 class IntVal(Node):
 
@@ -273,7 +434,7 @@ class IntVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		return (self.value,"integer")
 
@@ -286,7 +447,7 @@ class BoolVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		return (self.value,"boolean")
 
@@ -298,7 +459,7 @@ class InputOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		return (int(input("Insira um número: \n")),"integer")
 
@@ -310,7 +471,7 @@ class VarVal(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		return ST.getter(self.value.upper())
 
@@ -322,7 +483,7 @@ class NoOp(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
 		pass
 
@@ -334,21 +495,17 @@ class VarDec(Node):
 		self.value = value
 		self.children = children
 
-	def Evaluate(self,ST):
+	def Evaluate(self,ST,w=True):
 
-		if self.value == "var":
+		if self.value == "function":
 
-			ST.setter(self.children[0], (self.children[1],self.children[2].Evaluate(ST)))
+			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST),0))
 
 		else:
 
-			ST.setter(self.children[0], (self.children[1].Evaluate(ST)[0],self.children[2].Evaluate(ST)))
+			ST.setter(self.children[0].upper(), (self.children[1],self.children[2].Evaluate(ST)))
 
-			if (type(self.children[1].Evaluate(ST)[0]) == bool and self.children[2].Evaluate(ST) != "boolean") or (type(self.children[1].Evaluate(ST)[0]) == int and self.children[2].Evaluate(ST) != "integer") :
-
-				raise Exception ("Declaracao inconsistente entre int e bool")
-
-
+		return self.children[0].upper()
 
 
 class Token:
@@ -357,7 +514,6 @@ class Token:
 
 		self.string = string
 		self.value = value
-
 
 
 
@@ -441,15 +597,16 @@ class Tokenizer:
 
 				variable = ""
 
-				while self.origin[i].isalpha():
+				while self.origin[i].isalpha() or self.origin[i] == "_":
 
 					variable += str(self.origin[i])
 
 					i += 1
 
-					if i > len(self.origin)-1:
+					if i > len(self.origin)-1 or str(self.origin[i]) == "(" or str(self.origin[i]) == ")":
 
 						break
+
 
 				variable = variable.upper()
 
@@ -469,13 +626,14 @@ class Tokenizer:
 
 					return self.actual
 
-				elif variable == "END":
+				elif variable == "CALL":
 
-					self.actual.string = "end"
-					self.actual.value = "end"
+					self.actual.string = "call"
+					self.actual.value = "call"
 					self.position = i
 
 					return self.actual
+
 
 				elif variable == "WHILE":
 
@@ -533,11 +691,19 @@ class Tokenizer:
 
 					return self.actual
 
+				elif variable == "FUNCTION":
+
+					self.actual.string = "function"
+					self.actual.value = "function"
+					self.position = i+1
+
+					return self.actual
+
 				elif variable == "TRUE":
 
 					self.actual.string = "boolean"
 					self.actual.value = True
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -545,7 +711,15 @@ class Tokenizer:
 
 					self.actual.string = "boolean"
 					self.actual.value = "boolean"
-					self.position = i+1
+					self.position = i
+
+					return self.actual
+
+				elif variable == "END":
+
+					self.actual.string = "end"
+					self.actual.value = "end"
+					self.position = i
 
 					return self.actual
 
@@ -553,7 +727,7 @@ class Tokenizer:
 
 					self.actual.string = "integer"
 					self.actual.value = "integer"
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -561,7 +735,7 @@ class Tokenizer:
 
 					self.actual.string = "boolean"
 					self.actual.value = False
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -569,7 +743,15 @@ class Tokenizer:
 
 					self.actual.string = "not"
 					self.actual.value = "not"
-					self.position = i+1
+					self.position = i
+
+					return self.actual
+
+				elif variable == "VOID":
+
+					self.actual.string = "void"
+					self.actual.value = "void"
+					self.position = i
 
 					return self.actual
 
@@ -581,19 +763,19 @@ class Tokenizer:
 
 					return self.actual
 
-				elif variable == "SUB":
+				elif variable == "DEF":
 
-					self.actual.string = "sub"
-					self.actual.value = "sub"
+					self.actual.string = "def"
+					self.actual.value = "def"
 					self.position = i+1
 
 					return self.actual
 
-				elif variable == "MAIN":
+				elif variable == "SUB":
 
-					self.actual.string = "main"
-					self.actual.value = "main"
-					self.position = i+1
+					self.actual.string = "sub"
+					self.actual.value = "sub"
+					self.position = i
 
 					return self.actual
 
@@ -601,7 +783,7 @@ class Tokenizer:
 
 					self.actual.string = "int"
 					self.actual.value = "int"
-					self.position = i+1
+					self.position = i
 
 					return self.actual
 
@@ -609,6 +791,31 @@ class Tokenizer:
 
 					self.actual.string = "bool"
 					self.actual.value = "bool"
+					self.position = i
+
+					return self.actual
+
+
+				elif variable == "MAIN":
+
+					self.actual.string = "main"
+					self.actual.value = "main"
+					self.position = i
+
+					return self.actual
+
+				elif variable == "DIM":
+
+					self.actual.string = "dim"
+					self.actual.value = "dim"
+					self.position = i+1
+
+					return self.actual
+
+				elif variable == "AS":
+
+					self.actual.string = "as"
+					self.actual.value = "as"
 					self.position = i+1
 
 					return self.actual
@@ -650,10 +857,6 @@ class Tokenizer:
 
 				return self.actual
 
-			elif self.origin[i] == "	":
-
-				pass
-
 			elif self.origin[i] == "/":
 
 				self.actual.string = "division"
@@ -683,6 +886,14 @@ class Tokenizer:
 
 				self.actual.string = "="
 				self.actual.value = "="
+				self.position = i+1
+
+				return self.actual
+
+			elif self.origin[i] == ",":
+
+				self.actual.string = ","
+				self.actual.value = ","
 				self.position = i+1
 
 				return self.actual
@@ -733,18 +944,273 @@ class Tokenizer:
 
 class Parser:
 
-	def Main(BT):
+	def Program(BT):
 
 		nexttoken = Parser.tokens.actual
 
-		main_return = Parser.Statements(BT)
+		children = []
 
-		while nexttoken.string != "EOF":
+		while nexttoken.string == '\n':
+
+			nexttoken = Parser.tokens.selectNext()
+
+		while nexttoken.string in ["def","function","int","bool","void"]:
+
+			if nexttoken.string in ["def","void"]:
+
+				node = Parser.SubDec(BT)
+
+			elif nexttoken.string in ["function","int","bool"]:
+
+				node = Parser.FuncDec(BT)
+
+			children.append(node)
+
+		program = ProgramOp("main",children)
+
+		return program
+
+
+	def SubDec(BT):
+
+		nexttoken = Parser.tokens.actual
+
+		children = []
+
+		nexttoken = Parser.tokens.selectNext()
+
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+		identifier_1 = nexttoken.value.upper()
+
+		children.append(None)
+
+		nexttoken = Parser.tokens.selectNext()
+	
+
+		while nexttoken.string == "\n":
 
 			nexttoken = Parser.tokens.selectNext()
 
 
-		return main_return
+		if nexttoken.string != "(":
+
+			raise Exception ("Faltou abrir ( ...")
+
+		nexttoken = Parser.tokens.selectNext()
+
+
+		while nexttoken.value != ")":
+
+			identifier = nexttoken.value.upper()
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "as":
+
+				raise Exception ("Faltou as nos argumentos da funcao sub")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			children.append(VarDec("var", [identifier , 0 , TypeOp("sub",[nexttoken.value])]))
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string in [")",","]:
+
+				if nexttoken.string == ",":
+
+					nexttoken = Parser.tokens.selectNext()
+
+				else:
+
+					break
+
+			else:
+
+				raise Exception("Espera-se que ou tenha , ou )")
+
+
+		nexttoken = Parser.tokens.selectNext()
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+		if nexttoken.string == "end":
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "sub":
+
+				raise Exception ("Faltou fechar subbb")
+
+			else:
+
+				while nexttoken.string == "\n":
+
+					nexttoken = Parser.tokens.selectNext()
+
+		else:
+	
+			stmt = Parser.Statements(BT)
+		
+
+			while nexttoken.string == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
+
+			children.append(stmt)
+
+
+			if nexttoken.string == "end":
+
+				nexttoken = Parser.tokens.selectNext()
+
+				if nexttoken.string != "sub":
+
+					raise Exception ("Faltou fechar sub")
+
+				else:
+
+					nexttoken = Parser.tokens.selectNext()
+
+					while nexttoken.string == "\n":
+
+						nexttoken = Parser.tokens.selectNext()
+
+		children[0] = (VarDec("var", [identifier_1 , children , TypeOp("sub",["sub"])]))
+
+		return SubDecOp("sub",children)
+
+
+	def FuncDec(BT):
+
+		nexttoken = Parser.tokens.actual
+
+		children = []
+
+		if nexttoken.string == "int":
+			t = "integer"
+		elif nexttoken.string == "bool":
+			t = "boolean"
+
+		tipo = TypeOp(t,[t])
+
+		nexttoken = Parser.tokens.selectNext()
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+		identifier_1 = nexttoken.value.upper()
+
+		children.append(None)
+
+		nexttoken = Parser.tokens.selectNext()
+	
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+		if nexttoken.string != "(":
+
+			raise Exception ("Faltou abrir ( no func...")
+
+		nexttoken = Parser.tokens.selectNext()
+
+
+		while nexttoken.value != ")":
+
+			identifier = nexttoken.value.upper()
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "as":
+
+				raise Exception ("Faltou as nos argumentos da funcao sub")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			children.append(VarDec("var", [identifier , 0 , TypeOp("function",[nexttoken.value])]))
+
+			nexttoken = Parser.tokens.selectNext()
+
+
+			if nexttoken.string in [")",","]:
+
+				if nexttoken.string == ",":
+
+					nexttoken = Parser.tokens.selectNext()
+
+				else:
+
+					break
+
+			else:
+
+				raise Exception("Espera-se que ou tenha , ou )")
+
+
+		nexttoken = Parser.tokens.selectNext()
+
+
+		
+
+
+		while nexttoken.string == "\n":
+
+			nexttoken = Parser.tokens.selectNext()
+
+		if nexttoken.string == "end":
+
+			nexttoken = Parser.tokens.selectNext()
+
+			if nexttoken.string != "function":
+
+				raise Exception ("Faltou fechar subbb")
+
+			else:
+
+				while nexttoken.string == "\n":
+
+					nexttoken = Parser.tokens.selectNext()
+
+		else:
+
+			stmt = Parser.Statements(BT)
+
+			while nexttoken.string == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
+
+			children.append(stmt)
+
+			if nexttoken.string == "end":
+
+				nexttoken = Parser.tokens.selectNext()
+
+
+				if nexttoken.string != "function":
+
+					raise Exception ("Faltou fechar function")
+
+				else:
+
+					nexttoken = Parser.tokens.selectNext()
+
+					while nexttoken.string == "\n":
+
+						nexttoken = Parser.tokens.selectNext()
+
+		children[0] = (VarDec("function", [identifier_1 , children , tipo]))
+
+		return FuncDecOp("function",children)
 
 
 	def Statements(BT):
@@ -753,7 +1219,7 @@ class Parser:
 		
 		nexttoken = Parser.tokens.actual
 
-		while nexttoken.string != "EOF" and nexttoken.string != "else" and nexttoken.value not in BT.BT:
+		while nexttoken.string != "EOF" and nexttoken.string != "else" and nexttoken.value not in BT.BT and nexttoken.string != "end":
 
 			child = Parser.Statement(BT)
 
@@ -775,7 +1241,7 @@ class Parser:
 
 		nexttoken = Parser.tokens.actual
 
-		if nexttoken.string == "identifier" and nexttoken.value not in BT.BT:
+		if nexttoken.string == "identifier":
 
 			identifier = Identifier(nexttoken.value,[])
 
@@ -791,16 +1257,74 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext() 
 
-
 				return node
 
 			else:
 
-				print(nexttoken.value)
-
 				raise Exception ("Espera-se uma atribuicao")
 
-		if nexttoken.string == "int" or nexttoken.string == "bool":
+		if nexttoken.string == "dim":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			identifier = nexttoken.value
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			if nexttoken.string != "as":
+
+				raise Exception ("Espera-se um 'as'")
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			node = VarDec("var", [identifier , 0 , TypeOp("var",[nexttoken.value])])
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			return node
+
+		elif nexttoken.string == "call":
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			identifier = nexttoken.value
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			if nexttoken.string != "(":
+
+				raise Exception ("Espara-se ( para parametros da funcao")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			children = []
+
+			while nexttoken.string != ")":
+
+				node = Parser.RelExpression()
+
+				children.append(node)
+
+				if nexttoken.string in [")",","]:
+
+					if nexttoken.string == ",":
+
+						nexttoken = Parser.tokens.selectNext()
+
+					else:
+
+						nexttoken = Parser.tokens.selectNext()
+						break
+					
+				else:
+
+					raise Exception("Espera-se que ou tenha , ou )")
+
+			nexttoken = Parser.tokens.selectNext()
+
+			return FuncCallerOp(identifier,children)
+
+		elif nexttoken.string == "int" or nexttoken.string == "bool":
 
 			tipo_identificador = nexttoken.string
 
@@ -818,7 +1342,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 					
-				node = VarDec("atr", [identifier , Parser.parserExpression() , tipoop])
+				node = VarDec("atr", [identifier , Parser.RelExpression() , tipoop])
 
 				return node
 
@@ -830,17 +1354,22 @@ class Parser:
 
 		elif nexttoken.string == "print":
 
-			nexttoken = Parser.tokens.selectNext() 
-
-			node = PrintOp("print",[Parser.parserExpression()])
 
 			nexttoken = Parser.tokens.selectNext() 
+
+			node = PrintOp("print",[Parser.RelExpression()])
+
+			nexttoken = Parser.tokens.selectNext() 
+
+			while nexttoken.value == "\n":
+
+				nexttoken = Parser.tokens.selectNext() 
 
 			return node
 
 		elif nexttoken.string == "begin":
 
-			node = Parser.Statements(BT)
+			node = Parser.Statements()
 
 			nexttoken = Parser.tokens.selectNext() 
 
@@ -899,6 +1428,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
+
 				node_else = Parser.Statements(BT)
 
 
@@ -911,6 +1441,10 @@ class Parser:
 
 			node = IfOp(value,[node_rel,node_true,node_else])
 
+			while nexttoken.value == "\n":
+
+				nexttoken = Parser.tokens.selectNext()
+
 			return node
 
 
@@ -921,9 +1455,9 @@ class Parser:
 
 		else:
 
-			print(nexttoken.string)
+			print(nexttoken.value)
 
-			raise Exception ("Algo deu ruim com o token: "+str(nexttoken.value))
+			raise Exception ("Algo deu ruim")
 
 	def RelExpression():
 
@@ -931,20 +1465,30 @@ class Parser:
 
 		node1 = Parser.parserExpression()
 
-		comp_signal = nexttoken.string
+		while nexttoken.string in ["=",">","<"]:
 
-		nexttoken = Parser.tokens.selectNext()
+			comp_signal = nexttoken.string
 
-		node2 = Parser.parserExpression()
+			nexttoken = Parser.tokens.selectNext()
 
-		node = BinOp(comp_signal,[node1,node2])
+			node2 = Parser.parserExpression()
 
-		return node
+			node = BinOp(comp_signal,[node1,node2])
+
+			return node
+
+		else:
+
+			return node1
 
 
 	def factor():
 
 		nexttoken = Parser.tokens.actual
+
+		while nexttoken.string == "\n":
+			
+			nexttoken = Parser.tokens.selectNext()
 
 		soma = 0
 
@@ -967,21 +1511,53 @@ class Parser:
 
 		elif nexttoken.string == "identifier":
 
-			node = VarVal(Parser.tokens.actual.value,[])
+			identifier = nexttoken.value
 
 			nexttoken = Parser.tokens.selectNext()
 
-			return node
+			children = []
+
+			if nexttoken.string == "(":
+
+				nexttoken = Parser.tokens.selectNext()
+				
+				while nexttoken.string != ")":
+					
+					node = Parser.RelExpression()
+					
+					children.append(node)
+
+					if nexttoken.string == ",":
+
+						nexttoken = Parser.tokens.selectNext()
+
+					elif nexttoken.string == ")":
+
+						nexttoken = Parser.tokens.selectNext()
+
+						break
+
+				node = FuncCallerOp(identifier,children)
+
+				return node
+
+
+
+			else:
+
+				node = VarVal(identifier,[])
+
+				return node
 
 		elif nexttoken.string == "(":
 
 			nexttoken = Parser.tokens.selectNext()
 
-			soma = Parser.parserExpression()
+			soma = Parser.RelExpression()
 
 			if nexttoken.string != ")":
-
-				raise Exception ("Faltou fechar parênteses")
+				
+				raise Exception ("Faltou fechar parênteses tendeu")
 
 			nexttoken = Parser.tokens.selectNext()
 
@@ -1020,8 +1596,7 @@ class Parser:
 
 		else:
 
-			print (nexttoken.value)
-			raise Exception ("Invalid Sintax")
+			raise Exception ("Invalid Token Factor")
 
 	
 	def term():
@@ -1031,7 +1606,8 @@ class Parser:
 		node = Parser.factor()
 
 
-		while nexttoken.string in ["times", "division"]:
+		while nexttoken.string in ["times", "division","and"]:
+
 
 			if nexttoken.string == "times":
 
@@ -1059,7 +1635,6 @@ class Parser:
 
 				node = BinOp("and",[node,soma])
 						
-
 		return node
 
 
@@ -1073,7 +1648,7 @@ class Parser:
 		node = Parser.term()
 		
 
-		while nexttoken.string in ["plus", "minus"]:
+		while nexttoken.string in ["plus","minus","or"]:
 
 
 			if nexttoken.string == "plus":
@@ -1095,7 +1670,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				soma =  Parser.factor()
+				soma = Parser.factor()
 				node = BinOp("or",[node,soma])
 						
 
@@ -1108,7 +1683,7 @@ class Parser:
 		Parser.tokens = Tokenizer(code)
 		Parser.tokens.selectNext()
 
-		res = Parser.Main(BT)
+		res = Parser.Program(BT)
 
 		if Parser.tokens.actual.string == "EOF":
 
@@ -1116,7 +1691,7 @@ class Parser:
 
 		else:
 
-			print (Parser.tokens.actual.string)
+			print (Parser.tokens.actual.value)
 
 			raise Exception("Parser Error: EOF")
 
@@ -1127,9 +1702,11 @@ with open(file_name) as testfile:
 	string = testfile.read()
 
 
-ST1 = SymbolTable()
+ST = SymbolTable(None)
 BT = BlockTable()
 
-Parser.run(string,BT).Evaluate(ST1)
+Parser.run(string,BT).Evaluate(ST)
 
-print("ST = ",ST1.ST)
+
+
+
