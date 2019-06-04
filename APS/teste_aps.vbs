@@ -41,8 +41,12 @@ end function
 
 
 int abacate(var as int)
+	
+	while abacate<10
 
-	abacate = var;
+	abacate = abacate(var)+1
+
+	wend
 
 end function
 

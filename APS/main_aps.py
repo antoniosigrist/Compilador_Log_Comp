@@ -898,6 +898,14 @@ class Tokenizer:
 
 				return self.actual
 
+			elif self.origin[i] == ";":
+
+				self.actual.string = ";"
+				self.actual.value = ";"
+				self.position = i+1
+
+				return self.actual
+
 			elif self.origin[i] == ">":
 
 				self.actual.string = ">"
@@ -1044,7 +1052,7 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
-			if nexttoken.string != "sub":
+			if nexttoken.string != "function":
 
 				raise Exception ("Faltou fechar subbb")
 
@@ -1070,7 +1078,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext()
 
-				if nexttoken.string != "sub":
+				if nexttoken.string != "function":
 
 					raise Exception ("Faltou fechar sub")
 
@@ -1230,6 +1238,8 @@ class Parser:
 			if nexttoken.string == "\n":
 
 				nexttoken = Parser.tokens.selectNext()
+
+
 
 		node = StatementsOp("Statements",children)
 
@@ -1452,6 +1462,9 @@ class Parser:
 
 			nexttoken = Parser.tokens.selectNext()
 
+		elif nexttoken.string == ";":
+
+			nexttoken = Parser.tokens.selectNext()
 
 		else:
 

@@ -51,6 +51,7 @@ static int check_type(void);
 "default"               { return TOKEN(DEFAULT); }
 "else"                  { return TOKEN(ELSE); }
 "if"                    { return TOKEN(IF); }
+"as"                    { return TOKEN(AS); }
 "return"                { return TOKEN(RETURN); }
 "while"                 { return TOKEN(WHILE); }
 "print"                 { return TOKEN(PRINT); }

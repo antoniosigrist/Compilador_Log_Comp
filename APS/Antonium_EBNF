@@ -9,12 +9,19 @@ O intuito da linguagem é facilitar pessoas a identificar blocos condicionais. A
 
 EBNT:
 
+tipo :: void | int | bool
 
 codigo :: definicao_variavel | definicao_funcao | if_statement | for_statement | while_statement
 
-definicao_variavel :: <variavel> '=' <constante> | <variavel> | <funcao>
+t_tipo :: ‘as’ tipo
 
-definicao_funcao :: 'func' func_name '(' <constante> | <variavel> | <funcao> | empty ')' define_bloco codigo define_bloco
+definicao_variavel :: tipo <variavel> '=' <constante> | <variavel> | <funcao_chamada>
+
+atributos_func :: <constante> t_tipo | <variavel> t_tipo | <funcao> t_tipo | empty | atributos_func
+
+definicao_funcao :: tipo func_name '(' atributos_func  ')' statements ‘end’ ‘func’
+
+funcao_chamada :: func_name '(' <constante> | <variavel> | <funcao> | empty ')'
 
 define_bloco :: [a-z]+ | *+ | |+ | \+ | (+ | %+ 
 

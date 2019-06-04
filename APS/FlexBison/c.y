@@ -369,7 +369,7 @@ generic_association
 
 identifier_list
 	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
+	| IDENTIFIER 'AS' identifier_list
 	;
 
 //expression
