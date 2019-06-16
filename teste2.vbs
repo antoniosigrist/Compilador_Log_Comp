@@ -1,21 +1,11 @@
-Function Soma(x as Integer, y as Integer) as Integer
-    Dim a as Integer
-    a=x+y
-    print a
-    while a < 8
-        a=Soma(a,1)
-    wend
-    
-    Soma = a
- 
-End Function
-
-
 Sub main()
-    Dim a as Integer
-    Dim b as Integer
-    a=3
-    b=Soma(a,4)
-    print a
-    print b
-end sub
+    Dim tb as boolean
+    Dim ti as integer
+
+    tb = TRUE
+    ti = 10
+
+    if tb then
+        print ti + 10
+    end if
+End Sub

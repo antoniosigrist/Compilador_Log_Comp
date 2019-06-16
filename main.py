@@ -49,7 +49,7 @@ class FuncCallerOp(Node):
 
 		s = ST.getter(self.value.upper())
 
-		ST_new.ST[self.value.upper()] =  (None, s[1])
+		ST_new.ST[self.value.upper()] = (None, s[1])
 
 		if self.value.upper() != "MAIN":
 
@@ -294,6 +294,9 @@ class SymbolTable:
 					valor = self.ancestor.getter(key)
 
 				except:
+					
+					print("deu erro")
+					print(valor)
 
 					raise Exception ("Voce tentou fazer recursao em "+key+ "?")
 		else:

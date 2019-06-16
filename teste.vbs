@@ -1,45 +1,27 @@
-Sub main()
+Function fibonacci(n as integer) as integer
+    ' codigo do raphael costa
+    dim flag as boolean
+    
+    flag = false
+    if n = 0 then
+        fibonacci = 1
+        flag = true
+    end if
 
-Dim i as Integer 
-Dim n as Integer 
-Dim f as Integer 
-dim b as integer
-dim h as integer
-dim b as boolean
+    if n = 1 then 
+        fibonacci = 1
+        flag = true
+    end if
 
-n=5
-i=2
-f=1
-h=0
+    if flag = false then
+        print 24
+        fibonacci = fibonacci(n-2) + fibonacci(n-1)
+    end if
 
-call xuxu (true,2) 'criar nó popula e depois chama o evaluate'
-
-
-While i < n+1
-	f=f*i
-	i=i+1 
-Wend
-
-
-b = oi(true,8)
-
-end Sub
-
-
-sub xuxu(iden as boolean,oioi as integer)
-print 3246
-dim p as boolean
-p = false
-
-iden = false
-print iden
-end sub
-
-
-
-function oi(hhh as boolean, tt as integer) as boolean
-hhh = false
-print 3245
-
-oi = false
-end function
+End Function
+Sub Main()
+    dim a as integer
+    a = fibonacci(2)
+    print 48
+    print a
+End Sub

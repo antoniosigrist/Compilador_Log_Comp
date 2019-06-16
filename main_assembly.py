@@ -11,6 +11,7 @@ class Assemb:
 	def write(text,w=True):
 
 		if w == True:
+
 			Assemb.asm = Assemb.asm + text + "\n"
 
 	def get_asm():
@@ -20,7 +21,7 @@ class Assemb:
 class Node:
 
 	i = 0
-	node_i = 0
+	node_i = 1
 
 	def __init__(self,value,children):
 
@@ -68,7 +69,6 @@ class StatementsOp(Node):
 
 			child.Evaluate(ST,w)
 
-			#print(ST.ST)
 
 class TypeOp(Node):
 
@@ -120,7 +120,6 @@ class Assignment(Node):
 
 	def Evaluate(self,ST,w=True):
 
-
 		var = ST.getter(self.children[0].upper())
 
 		if var != None:
@@ -156,25 +155,32 @@ class WhileOp(Node):
 
 		self.value = value
 		self.children = children
+		self.id = Node.newNodeId()
 
 	def Evaluate(self,ST,w=True):
 
-		node_id = Node.newNodeId()
-
-		Assemb.write("",w)
-		Assemb.write("LOOP_"+str(node_id)+" :")
+		Assemb.write("LOOP_"+str(self.id)+":",w)
 
 		w = True
+
+		a = self.children[0].Evaluate(ST,w)
+
+		print(a)
+
+		Assemb.write("CMP EBX, False",w)
+		Assemb.write("JE EXIT_"+str(self.id),w)
 		
-		while self.children[0].Evaluate(ST,w)[0] == True:
+		while a[0] == True:
 
 			self.children[1].Evaluate(ST,w)
 
 			w = False
 
+			a = self.children[0].Evaluate(ST,w)
+
 		w = True
-		Assemb.write("JMP LOOP_"+str(node_id),w)
-		Assemb.write("EXIT_"+str(node_id)+" :",w)
+		Assemb.write("JMP LOOP_"+str(self.id),w)
+		Assemb.write("EXIT_"+str(self.id)+":",w)
 		Assemb.write("",w)
 
 
@@ -184,38 +190,28 @@ class IfOp(Node):
 
 		self.value = value
 		self.children = children
+		self.id = Node.newNodeId()
 
 	def Evaluate(self,ST,w=True):
 
-		node_id = Node.newNodeId()
+		r = self.children[0].Evaluate(ST,w)
 
-		Assemb.write("",w)
-		Assemb.write("LOOP_"+str(node_id)+" :")
+		if r[1] != "boolean":
+			raise Exception("nao é um boolean no if")
 
-		if self.value == "if":
+		Assemb.write("CMP EBX, False",w)
+		Assemb.write(f"JE ELSE_{self.id}",w)
 
-			if self.children[0].Evaluate(ST,w)[0] == True:
+		self.children[1].Evaluate(ST,w)
 
-				self.children[1].Evaluate(ST,w)
+		Assemb.write(f"ELSE_{self.id}:",w)
 
-			else:
+		if self.value == "else":
 
-				pass
+			self.children[2].Evaluate(ST,w)
+				
 
 
-		elif self.value == "else":
-			
-			if self.children[0].Evaluate(ST,w)[0] == True:
-
-				self.children[1].Evaluate(ST,w)
-
-			else:
-
-				self.children[2].Evaluate(ST,w)
-
-		Assemb.write("JMP LOOP_"+str(node_id),w)
-		Assemb.write("EXIT_"+str(node_id)+" :",w)
-		Assemb.write("",w)
 
 
 class SymbolTable:
@@ -264,8 +260,8 @@ class Identifier(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		pass
-
+		valor = ST.getter(self.value)
+		writeAssembly.write(f"MOV EBX, [EBP-{valor[2]}]",w)
 
 
 class BinOp(Node):
@@ -324,8 +320,6 @@ class BinOp(Node):
 
 					Assemb.write("CMP EAX, EBX",w)
 					Assemb.write("CALL binop_je",w)
-					Assemb.write("CMP EBX, False",w)
-					Assemb.write("JE EXIT_"+str(node_id),w)
 
 					return (children0[0] == children1[0] , "boolean")
 
@@ -352,8 +346,6 @@ class BinOp(Node):
 
 					Assemb.write("CMP EAX, EBX",w)
 					Assemb.write("CALL binop_jg",w)
-					Assemb.write("CMP EBX, False",w)
-					Assemb.write("JE EXIT_"+str(node_id),w)
 					Assemb.write("",w)
 
 					return (children0[0] > children1[0] , "boolean")
@@ -362,8 +354,6 @@ class BinOp(Node):
 
 					Assemb.write("CMP EAX, EBX",w)
 					Assemb.write("CALL binop_jl",w)
-					Assemb.write("CMP EBX, False",w)
-					Assemb.write("JE EXIT_"+str(node_id),w)
 					Assemb.write("",w)
 
 
@@ -383,19 +373,23 @@ class UnOp(Node):
 
 		if self.value == "plus":
 
-			return  (self.children[0].Evaluate(ST,w),"integer")
+			Assemb.write("ADD EBX, 0",w)
+			return  (self.children[0].Evaluate(ST,w)[0],"integer")
 
 		if self.value == "minus":
 
-			Assemb.write("NEG EBX",w)
+			Assemb.write("MOV EAX, {}".format(self.children[0]),w)
+			Assemb.write("MOV EBX, -1",w)
+			Assemb.write("IMUl EBX",w)
+			Assemb.write("MOV EBX, EAX",w)
 
 			return (-self.children[0].Evaluate(ST,w)[0],"integer")
 
 		if self.value == "not":
 
-			Assemb.write("NOT EBX",w)
+			Assemb.write("NEG EBX",w)
 
-			return (not self.children[0].Evaluate(ST,w),"integer")
+			return (not self.children[0].Evaluate(ST,w)[0],"integer")
 
 
 
@@ -424,7 +418,12 @@ class BoolVal(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		Assemb.write("MOV EBX, "+str(self.value),w)
+		if self.value == True:
+			valor = 1
+		elif self.value == False:
+			valor = 0
+
+		Assemb.write("MOV EBX, "+str(valor),w)
 
 		return (self.value,"boolean")
 
@@ -437,8 +436,9 @@ class InputOp(Node):
 		self.children = children
 
 	def Evaluate(self,ST,w=True):
-
-		return (int(input("Insira um número: \n")),"integer")
+		inp = int(input("Insira um número: \n"))
+		Assemb.write(f"MOV EBX, {inp}")
+		return (inp,"integer")
 
 
 class VarVal(Node):
