@@ -1,4 +1,4 @@
-// Baseado no programa: https://github.com/sandeep007734/Toy-C-Compiler-using-Flex-Bison-LLVM/blob/master/c.y
+// Baseado de um programa em C adaptado para as diferenças da minha linguagem. fonte: https://github.com/sandeep007734/Toy-C-Compiler-using-Flex-Bison-LLVM/blob/master/c.y
 
 
 %{
@@ -414,8 +414,7 @@ jump_statement
 	: GOTO IDENTIFIER ';'
 	| CONTINUE ';'
 	| BREAK ';'
-	| RETURN ';' {$$ = new ReturnStatementNode();}
-	| RETURN expression ';' {$$ = new ReturnStatementNode($2);}
+
 	;
 
 labeled_statement
