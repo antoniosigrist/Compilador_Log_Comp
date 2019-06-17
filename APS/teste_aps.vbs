@@ -17,7 +17,11 @@ if 0 < 7 abudabe
 
 		if x = 5 Blocoxis
 
+			print x
+
 			x = x + 2;
+
+			print x
 			
 			y = True;
 
@@ -42,13 +46,10 @@ end function
 
 int abacate(var as int)
 	
-	while abacate<10
 
-	abacate = abacate(var)+1
+	abacate = 3
 
-	wend
 
 end function
-
 
 

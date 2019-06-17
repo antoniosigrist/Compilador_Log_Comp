@@ -67,7 +67,6 @@ class FuncCallerOp(Node):
 					Assignment("=", [s[0][i].Evaluate(ST_new), self.children[i-1]]).Evaluate(ST_new)
 
 				s[0][-1].Evaluate(ST_new)	
-				print(ST_new.ST)	
 				
 			else:
 
@@ -75,7 +74,6 @@ class FuncCallerOp(Node):
 		else:
 
 			ST.ST["MAIN"][0][-1].Evaluate(ST_new)
-			print(ST_new.ST)
 			
 		if True:
 
@@ -225,7 +223,6 @@ class Assignment(Node):
 					pass
 
 				ST.setter(self.children[0], child_with_id)
-				print(ST.ST)
 
 			else:
 
@@ -964,6 +961,7 @@ class Parser:
 
 		while nexttoken.string in ["def","function","int","bool","void"]:
 
+
 			if nexttoken.string in ["def","void"]:
 
 				node = Parser.SubDec(BT)
@@ -1390,6 +1388,11 @@ class Parser:
 			nexttoken = Parser.tokens.selectNext() 
 
 			node_rel = Parser.RelExpression()
+
+			while nexttoken.value == "\n":
+
+				nexttoken = Parser.tokens.selectNext() 
+
 
 			if nexttoken.string != "identifier":
 
