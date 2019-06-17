@@ -14,7 +14,6 @@ class Node:
 
 	def Evaluate(self,ST,w=True):
 
-
 		pass
 
 
@@ -60,7 +59,6 @@ class FuncCallerOp(Node):
 					Assignment("=", [s[0][i].Evaluate(ST_new), self.children[i-1]]).Evaluate(ST_new)
 
 				s[0][-1].Evaluate(ST_new)	
-				print(ST_new.ST)	
 				
 			else:
 
@@ -68,11 +66,11 @@ class FuncCallerOp(Node):
 		else:
 
 			ST.ST["MAIN"][0][-1].Evaluate(ST_new)
-			print(ST_new.ST)
 			
-		if True:
 
-			valor = ST_new.getter(self.value.upper())
+		valor = ST_new.getter(self.value.upper())
+
+		if valor!=None:
 
 			return valor
 
@@ -197,7 +195,8 @@ class Assignment(Node):
 	def Evaluate(self,ST,w=True):
 
 
-		var = ST.getter(self.children[0].upper())
+		#var = ST.getter(self.children[0].upper(),True)
+		var = ST.ST[self.children[0].upper()]
 
 		if var != None:
 
@@ -281,35 +280,40 @@ class SymbolTable:
 		self.ST = {}
 		self.ancestor = ancestor
 
-	def getter(self,key):
+	def getter(self,key,assigment=False):
 
-		if key in self.ST:
+		if key in self.ST:# and assigment == False:
 
 			valor = self.ST[key]
 
 			if valor[0] == None:
 
-				try:
+				if self.ancestor != None:
 
-					valor = self.ancestor.getter(key)
+					try:
 
-				except:
-					
-					print("deu erro")
-					print(valor)
+						valor = self.ancestor.getter(key)
 
-					raise Exception ("Voce tentou fazer recursao em "+key+ "?")
+					except:
+
+						raise Exception ("Voce tentou fazer recursao em "+key+ "?")
+
+
+			return valor
+
 		else:
 
 			if self.ancestor != None:
 
 				valor = self.ancestor.getter(key)
 
+				return valor
+
 			else:
 
 				raise Exception ("Variável "+key+ " não foi encontrada na ST")
 
-		return valor
+		
 
 	def setter(self,key,value):
 
@@ -424,7 +428,7 @@ class UnOp(Node):
 
 		if self.value == "not":
 
-			return (not self.children[0].Evaluate(ST),"integer")
+			return (not self.children[0].Evaluate(ST)[0],"integer")
 
 
 
@@ -475,7 +479,7 @@ class VarVal(Node):
 
 	def Evaluate(self,ST,w=True):
 
-		return ST.getter(self.value.upper())
+		return ST.getter(self.value.upper(),True)
 
 
 class NoOp(Node):
@@ -1220,7 +1224,7 @@ class Parser:
 
 				nexttoken = Parser.tokens.selectNext() 
 
-				res = Parser.parserExpression()
+				res = Parser.RelExpression()
 
 				node = Assignment("=", [identifier.value , res])
 
@@ -1257,8 +1261,6 @@ class Parser:
 			nexttoken = Parser.tokens.selectNext() 
 
 			identifier = nexttoken.value
-
-			print("iden " +identifier)
 
 			nexttoken = Parser.tokens.selectNext() 
 
@@ -1410,10 +1412,8 @@ class Parser:
 			node = BinOp(comp_signal,[node1,node2])
 
 			return node
-
-		else:
-
-			return node1
+		
+		return node1
 
 
 	def factor():
